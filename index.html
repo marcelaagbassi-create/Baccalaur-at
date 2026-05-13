@@ -759,6 +759,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, update, onValue, off, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ══════════════ CONFIG FIREBASE ══════════════
 const fbConfig = {
@@ -772,6 +774,17 @@ const fbConfig = {
 };
 const app = initializeApp(fbConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
+
+// ══════════════ AUTH ANONYME (résout PERMISSION_DENIED) ══════════════
+let authReady = false;
+signInAnonymously(auth).catch(e => console.warn('Auth anonyme échouée:', e));
+onAuthStateChanged(auth, user => {
+  if (user && !authReady) {
+    authReady = true;
+    console.log('✅ Auth Firebase OK, uid:', user.uid);
+  }
+});
 
 // ══════════════ CONSTANTES ══════════════
 const CATS = [
@@ -842,7 +855,7 @@ let listeners = [];
 let revCountdown = null;
 
 // ══════════════ INIT ══════════════
-window.addEventListener('load', () => {
+function initApp() {
   chargerLocal();
   if (!J.uid) { J.uid = 'u_'+Math.random().toString(36).substr(2,8)+Date.now().toString(36); sauvegarderLocal(); }
   bEmo(); bBib();
@@ -860,6 +873,18 @@ window.addEventListener('load', () => {
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer
   });
+}
+
+window.addEventListener('load', () => {
+  // Attendre que l auth anonyme soit etablie avant de demarrer
+  // Cela evite le PERMISSION_DENIED lors des premieres operations Firebase
+  let appDemarre = false;
+  const demarrer = () => { if (!appDemarre) { appDemarre = true; initApp(); } };
+  const unsubscribe = onAuthStateChanged(auth, user => {
+    if (user) { unsubscribe(); demarrer(); }
+  });
+  // Fallback si auth prend trop longtemps (pas de reseau)
+  setTimeout(demarrer, 4000);
 });
 
 // ══════════════ LOCAL STORAGE ══════════════
