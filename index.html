@@ -205,16 +205,69 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 @keyframes sp{to{transform:rotate(360deg);}}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}</style>
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+/* SVG ICONS */
+.ic{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;}
+.ic svg{display:block;}
+.btn .ic{margin-right:7px;}
+.ic-sm svg{width:14px;height:14px;}
+.bot-svg{display:flex;justify-content:center;}
+</style>
 </head>
 <body>
+<!-- SVG SPRITE -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="ic-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></symbol>
+<symbol id="ic-gamepad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></symbol>
+<symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="ic-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
+<symbol id="ic-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+<symbol id="ic-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+<symbol id="ic-door" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4H3v16h10"/><path d="M15 8l4 4-4 4"/><line x1="19" y1="12" x2="7" y2="12"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+<symbol id="ic-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></symbol>
+<symbol id="ic-speaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol>
+<symbol id="ic-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></symbol>
+<symbol id="ic-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+<symbol id="ic-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+<symbol id="ic-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
+<symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+<symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+<symbol id="ic-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></symbol>
+<symbol id="ic-skull" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></symbol>
+<symbol id="ic-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+<symbol id="ic-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+<symbol id="ic-heart" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+<symbol id="ic-robot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/><path d="M9 14h.01M15 14h.01"/><path d="M8 20v2M16 20v2"/></symbol>
+<symbol id="ic-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></symbol>
+<symbol id="ic-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
+<symbol id="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+<symbol id="ic-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+<symbol id="ic-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
+<symbol id="ic-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+<symbol id="ic-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+<symbol id="ic-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><line x1="5" y1="20" x2="19" y2="20"/></symbol>
+<symbol id="ic-star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+<symbol id="ic-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="ic-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.17 9.17A3 3 0 0 1 15 12a3 3 0 0 1-5.83.83"/></symbol>
+<symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+<symbol id="ic-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+<symbol id="ic-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.414-4.223 3 3 0 0 1 0-4.558 2.5 2.5 0 0 1 1.414-4.223A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.414-4.223 3 3 0 0 0 0-4.558 2.5 2.5 0 0 0-1.414-4.223A2.5 2.5 0 0 0 14.5 2z"/></symbol>
+<symbol id="ic-circlecheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></symbol>
+<symbol id="ic-circlex" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></symbol>
+<symbol id="ic-speed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="12 6 12 12 16 14"/></symbol>
+<symbol id="ic-dot-green" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#5B8A3C"/></symbol>
+<symbol id="ic-dot-yellow" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#C8960C"/></symbol>
+<symbol id="ic-dot-red" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#8B3A0F"/></symbol>
+</svg>
 <div class="app">
 
 <!-- ACCUEIL -->
 <div class="ecran actif" id="e-acc">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;width:100%;max-width:480px;">
     <div>
-      <div class="logo">🎓 BACCALAURÉAT</div>
+      <div class="logo"><span class="ic" style="color:var(--or);margin-right:8px;"><svg width="32" height="32"><use href="#ic-cap"/></svg></span>BACCALAURÉAT</div>
       <div class="logo-sub">LE JEU DES MOTS EN COMPÉTITION</div>
     </div>
     <div id="fb-status" style="font-size:.72rem;color:var(--muet);display:flex;align-items:center;gap:8px;">
@@ -224,18 +277,18 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     <div class="carte tc">
       <div style="font-size:.72rem;color:var(--muet);letter-spacing:2px;margin-bottom:14px;">MON PROFIL</div>
       <div class="av" id="acc-av" onclick="allerProfil()" style="margin:0 auto 10px;">
-        <span id="acc-av-c">?</span><div class="av-ov">✏️</div>
+        <span id="acc-av-c">?</span><div class="av-ov"><span class="ic" style="color:#fff;"><svg width="18" height="18"><use href="#ic-pencil"/></svg></span></div>
       </div>
       <div id="acc-titre" style="font-family:'Orbitron',monospace;font-size:.67rem;color:var(--or);min-height:14px;letter-spacing:2px;margin-bottom:3px;"></div>
       <div id="acc-pseudo" style="font-family:'Orbitron',monospace;font-size:.9rem;margin-bottom:6px;">NOUVEAU JOUEUR</div>
       <div class="rp" id="acc-pieces"></div>
     </div>
     <div style="width:100%;max-width:480px;">
-      <button class="btn btn-or" onclick="allerCreerSalon()">🏆 CRÉER UN SALON</button>
-      <button class="btn btn-cyan mt2" onclick="allerEcran('e-join')">🎮 REJOINDRE UN SALON</button>
-      <button class="btn btn-vert mt2" onclick="allerSolo()">🎯 MODE SOLO</button>
-      <button class="btn btn-fantome mt2" onclick="allerProfil()">👤 MON PROFIL</button>
-      <button class="btn btn-fantome mt2" onclick="allerBoutique()">🛒 BOUTIQUE</button>
+      <button class="btn btn-or" onclick="allerCreerSalon()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-trophy"/></svg></span>CRÉER UN SALON</button>
+      <button class="btn btn-cyan mt2" onclick="allerEcran('e-join')"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-gamepad"/></svg></span>REJOINDRE UN SALON</button>
+      <button class="btn btn-vert mt2" onclick="allerSolo()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-target"/></svg></span>MODE SOLO</button>
+      <button class="btn btn-fantome mt2" onclick="allerProfil()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-user"/></svg></span>MON PROFIL</button>
+      <button class="btn btn-fantome mt2" onclick="allerBoutique()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-cart"/></svg></span>BOUTIQUE</button>
     </div>
   </div>
 </div>
@@ -243,10 +296,10 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <!-- PROFIL -->
 <div class="ecran" id="e-profil">
   <div style="width:100%;max-width:480px;padding-top:20px;">
-    <div class="tc mb4"><div class="logo" style="font-size:1.7rem;">👤 MON PROFIL</div></div>
+    <div class="tc mb4"><div class="logo" style="font-size:1.7rem;"><span class="ic" style="margin-right:6px;"><svg width="22" height="22"><use href="#ic-user"/></svg></span>MON PROFIL</div></div>
     <div class="tc" style="margin-bottom:12px;">
       <div class="av" id="p-av" onclick="document.getElementById('s-av').scrollIntoView({behavior:'smooth'})">
-        <span id="p-av-e">🦊</span><div class="av-ov">✏️</div>
+        <span id="p-av-e"><span class="ic" style="color:var(--or);"><svg width="28" height="28"><use href="#ic-user"/></svg></span></span><div class="av-ov"><span class="ic" style="color:#fff;"><svg width="18" height="18"><use href="#ic-pencil"/></svg></span></div>
       </div>
       <div id="p-titre" style="font-family:'Orbitron',monospace;font-size:.67rem;color:var(--or);min-height:14px;letter-spacing:2px;"></div>
     </div>
@@ -255,7 +308,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <input class="champ" id="p-pseudo" type="text" placeholder="Ton nom de guerrier..." maxlength="16">
     </div>
     <div class="carte mb4" id="s-av">
-      <div class="titre-carte">🖼️ PHOTO DE PROFIL</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-image"/></svg></span>PHOTO DE PROFIL</div>
       <div class="ong-tabs">
         <div class="ong-tab actif" id="ot-e" onclick="onglet('e')">ÉMOJIS</div>
         <div class="ong-tab" id="ot-b" onclick="onglet('b')">BIBLIO</div>
@@ -265,25 +318,25 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div id="pan-b" style="display:none;"><div class="muet" style="margin-bottom:10px;">Avatars stylisés :</div><div class="gp" id="grille-biblio"></div></div>
       <div id="pan-p" style="display:none;">
         <div class="zu" onclick="document.getElementById('inp-cam').click()">
-          <div style="font-size:2.2rem;margin-bottom:7px;">📷</div>
+          <div style="margin-bottom:7px;" class="tc"><span class="ic" style="color:var(--cyan);"><svg width="36" height="36"><use href="#ic-camera"/></svg></span></div>
           <div class="muet"><strong style="color:var(--cyan);">Appareil photo</strong><br>Prendre une photo maintenant</div>
         </div>
-        <button class="btn btn-fantome mt2" onclick="document.getElementById('inp-gal').click()">🖼️ DEPUIS LA GALERIE</button>
+        <button class="btn btn-fantome mt2" onclick="document.getElementById('inp-gal').click()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-image"/></svg></span>DEPUIS LA GALERIE</button>
         <input type="file" id="inp-cam" accept="image/*" capture="user" style="display:none;" onchange="traiterPhoto(event)">
         <input type="file" id="inp-gal" accept="image/*" style="display:none;" onchange="traiterPhoto(event)">
         <div id="apercu" style="display:none;margin-top:12px;text-align:center;">
           <img id="img-ap" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:3px solid var(--or);">
-          <div class="vert" style="font-size:.77rem;margin-top:4px;">✅ Photo prête !</div>
+          <div class="vert" style="font-size:.77rem;margin-top:4px;"><span class="ic" style="color:var(--vert);margin-right:4px;"><svg width="14" height="14"><use href="#ic-check"/></svg></span>Photo prête !</div>
         </div>
       </div>
     </div>
     <div class="carte mb4">
       <div class="titre-carte">MES PIÈCES</div>
       <div class="rp" id="p-pieces"></div>
-      <div style="margin-top:8px;font-size:.72rem;color:var(--muet);">💡 Indices disponibles : <strong id="p-idx" style="color:var(--cyan);">3</strong></div>
+      <div style="margin-top:8px;font-size:.72rem;color:var(--muet);"><span class="ic" style="color:var(--cyan);margin-right:4px;"><svg width="14" height="14"><use href="#ic-bulb"/></svg></span>Indices disponibles : <strong id="p-idx" style="color:var(--cyan);">3</strong></div>
     </div>
-    <button class="btn btn-or" onclick="sauvegarderProfil()">💾 SAUVEGARDER</button>
-    <button class="btn btn-fantome mt2" onclick="allerEcran('e-acc')">← RETOUR</button>
+    <button class="btn btn-or" onclick="sauvegarderProfil()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-save"/></svg></span>SAUVEGARDER</button>
+    <button class="btn btn-fantome mt2" onclick="allerEcran('e-acc')"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-arrow-left"/></svg></span>RETOUR</button>
   </div>
 </div>
 
@@ -295,8 +348,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div class="titre-carte">CODE DU SALON</div>
       <input class="champ" id="inp-code" type="text" placeholder="XXXX" maxlength="4"
         style="font-family:'Orbitron',monospace;font-size:2.2rem;text-align:center;letter-spacing:8px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
-      <button class="btn btn-cyan mt2" id="btn-join" onclick="rejoindre()">🚀 REJOINDRE</button>
-      <button class="btn btn-fantome mt2" onclick="allerEcran('e-acc')">← RETOUR</button>
+      <button class="btn btn-cyan mt2" id="btn-join" onclick="rejoindre()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-rocket"/></svg></span>REJOINDRE</button>
+      <button class="btn btn-fantome mt2" onclick="allerEcran('e-acc')"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-arrow-left"/></svg></span>RETOUR</button>
     </div>
   </div>
 </div>
@@ -305,7 +358,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-salon">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.7rem;">🏟️ SALON</div>
+      <div class="logo" style="font-size:1.7rem;"><span class="ic" style="color:var(--or);margin-right:6px;"><svg width="24" height="24"><use href="#ic-trophy"/></svg></span>SALON</div>
       <div class="code-salon" id="aff-code">----</div>
       <div class="muet mt2">Partage ce code aux autres joueurs</div>
     </div>
@@ -314,7 +367,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <ul class="lj" id="liste-j"></ul>
     </div>
     <div class="carte mb4" id="reg-hote" style="display:none;">
-      <div class="titre-carte">⚙️ RÉGLAGES</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-sliders"/></svg></span>RÉGLAGES</div>
       <div style="margin-bottom:13px;">
         <label style="font-size:.7rem;letter-spacing:2px;color:var(--muet);margin-bottom:6px;display:block;text-transform:uppercase;">Nombre de tours</label>
         <select class="champ" id="sel-tours">
@@ -324,13 +377,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       </div>
     </div>
     <div id="ctrl-h" style="display:none;">
-      <button class="btn btn-vert" onclick="lancerPartie()">▶ LANCER LA PARTIE</button>
+      <button class="btn btn-vert" onclick="lancerPartie()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-play"/></svg></span>LANCER LA PARTIE</button>
     </div>
     <div id="att-inv" class="tc" style="display:none;">
       <div class="spin"></div>
       <div class="muet">En attente du lancement par l'hôte...</div>
     </div>
-    <button class="btn btn-rose mt2" onclick="quitterSalon()">🚪 QUITTER LE SALON</button>
+    <button class="btn btn-rose mt2" onclick="quitterSalon()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-door"/></svg></span>QUITTER LE SALON</button>
   </div>
 </div>
 
@@ -360,9 +413,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
   </div>
   <div class="zt"><div class="gj" id="gj"></div></div>
   <div class="aj">
-    <button class="btn btn-or" onclick="valider()" id="btn-val">✅ VALIDER</button>
-    <button class="btn btn-fantome" onclick="ouvrirIndice()" style="max-width:54px;">💡</button>
-    <button class="btn btn-rose" onclick="demanderArret()" style="max-width:54px;">⛔</button>
+    <button class="btn btn-or" onclick="valider()" id="btn-val"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-check"/></svg></span>VALIDER</button>
+    <button class="btn btn-fantome" onclick="ouvrirIndice()" style="max-width:54px;"><span class="ic"><svg width="20" height="20"><use href="#ic-bulb"/></svg></span></button>
+    <button class="btn btn-rose" onclick="demanderArret()" style="max-width:54px;"><span class="ic"><svg width="20" height="20"><use href="#ic-stop"/></svg></span></button>
   </div>
   <div class="tc muet" style="font-size:.67rem;padding:3px 0;" id="jstat"></div>
   <div class="oa cache" id="oa">
@@ -381,9 +434,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     </div>
     <div id="rt-liste"></div>
     <div class="carte mt4 mb4">
-      <div class="titre-carte">⚠️ MOTS ANNULÉS</div>
-      <div style="font-size:.72rem;color:var(--muet);margin-bottom:8px;">🔁 Doublon = même mot chez 2+ joueurs &nbsp;|&nbsp; ❌ Mot inexistant dans le dictionnaire</div>
-      <div id="rt-dub" class="muet" style="font-size:.86rem;">Aucun doublon ni mot invalide ✅</div>
+      <div class="titre-carte"><span class="ic" style="color:var(--or);margin-right:6px;"><svg width="16" height="16"><use href="#ic-warning"/></svg></span>MOTS ANNULÉS</div>
+      <div style="font-size:.72rem;color:var(--muet);margin-bottom:8px;"><span class="ic" style="margin-right:4px;"><svg width="14" height="14"><use href="#ic-repeat"/></svg></span>Doublon = même mot chez 2+ joueurs &nbsp;|&nbsp; <span class="ic" style="color:var(--rose);margin-right:4px;"><svg width="14" height="14"><use href="#ic-circlex"/></svg></span>Mot inexistant dans le dictionnaire</div>
+      <div id="rt-dub" class="muet" style="font-size:.86rem;">Aucun doublon ni mot invalide <span class="ic" style="color:var(--vert);margin-right:4px;"><svg width="14" height="14"><use href="#ic-check"/></svg></span></div>
     </div>
     <div class="rt" id="rt-pts"></div>
     <div id="rt-ctrl" class="mt4"></div>
@@ -394,17 +447,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-fin">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:2rem;">🏆 FIN DE PARTIE</div>
+      <div class="logo" style="font-size:2rem;"><span class="ic" style="color:var(--or);margin-right:8px;"><svg width="28" height="28"><use href="#ic-trophy"/></svg></span>FIN DE PARTIE</div>
       <div class="muet mt2">Classement final — <span id="fn-tours">10</span> tours</div>
     </div>
     <div id="fn-podium" class="mb4"></div>
-    <div class="carte mb4"><div class="titre-carte">📊 TABLEAU COMPLET</div><div id="fn-tab"></div></div>
+    <div class="carte mb4"><div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-list"/></svg></span>TABLEAU COMPLET</div><div id="fn-tab"></div></div>
     <div id="fn-rec" class="carte tc mb4" style="display:none;">
-      <div class="or orb" style="margin-bottom:8px;">🎉 FÉLICITATIONS !</div>
+      <div class="or orb" style="margin-bottom:8px;"><span class="ic" style="color:var(--or);margin-right:8px;"><svg width="22" height="22"><use href="#ic-star"/></svg></span>FÉLICITATIONS !</div>
       <div id="fn-rec-txt"></div>
     </div>
-    <button class="btn btn-or" onclick="retourMenu()">🏠 RETOUR AU MENU</button>
-    <button class="btn btn-cyan mt2" onclick="allerBoutique()">🛒 BOUTIQUE</button>
+    <button class="btn btn-or" onclick="retourMenu()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-home"/></svg></span>RETOUR AU MENU</button>
+    <button class="btn btn-cyan mt2" onclick="allerBoutique()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-cart"/></svg></span>BOUTIQUE</button>
   </div>
 </div>
 
@@ -412,16 +465,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-bout">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.7rem;">🛒 BOUTIQUE</div>
+      <div class="logo" style="font-size:1.7rem;"><span class="ic" style="margin-right:8px;"><svg width="24" height="24"><use href="#ic-cart"/></svg></span>BOUTIQUE</div>
       <div class="rp mt2" id="bout-p"></div>
     </div>
-    <div class="carte mb4"><div class="titre-carte">✨ PERSONNALISATION</div><div id="bout-cos"></div></div>
+    <div class="carte mb4"><div class="titre-carte"><span class="ic" style="color:var(--or);margin-right:6px;"><svg width="16" height="16"><use href="#ic-crown"/></svg></span>PERSONNALISATION</div><div id="bout-cos"></div></div>
     <div class="carte mb4">
-      <div class="titre-carte">💡 INDICES DE PARTIE</div>
+      <div class="titre-carte"><span class="ic" style="color:var(--cyan);margin-right:6px;"><svg width="16" height="16"><use href="#ic-bulb"/></svg></span>INDICES DE PARTIE</div>
       <div class="muet" style="margin-bottom:10px;">Un indice révèle un mot valide dans une catégorie pendant la partie.</div>
       <div id="bout-idx"></div>
     </div>
-    <button class="btn btn-fantome" onclick="allerEcran('e-acc')">← RETOUR</button>
+    <button class="btn btn-fantome" onclick="allerEcran('e-acc')"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-arrow-left"/></svg></span>RETOUR</button>
   </div>
 </div>
 
@@ -429,13 +482,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-solo">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.7rem;">🎯 MODE SOLO</div>
+      <div class="logo" style="font-size:1.7rem;"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-target"/></svg></span>MODE SOLO</div>
       <div class="logo-sub">JOUE SEUL, BATS TES RECORDS</div>
     </div>
 
     <!-- Statistiques solo -->
     <div class="carte mb4" id="solo-stats-carte">
-      <div class="titre-carte">📊 MES STATS</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-list"/></svg></span>MES STATS</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
         <div style="background:rgba(200,150,12,.08);border:1px solid var(--bord);border-radius:10px;padding:10px;">
           <div class="orb" style="font-size:1.3rem;color:var(--or);" id="stat-parties">0</div>
@@ -447,18 +500,18 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
         </div>
         <div style="background:rgba(200,150,12,.08);border:1px solid var(--bord);border-radius:10px;padding:10px;">
           <div class="orb" style="font-size:1.3rem;color:var(--vert);" id="stat-serie">0</div>
-          <div class="muet" style="font-size:.68rem;">Série 🔥</div>
+          <div class="muet" style="font-size:.68rem;">Série <span class="ic" style="color:var(--rose);"><svg width="14" height="14"><use href="#ic-fire"/></svg></span></div>
         </div>
       </div>
     </div>
 
     <!-- Modes de jeu -->
     <div class="carte mb4">
-      <div class="titre-carte">🕹️ CHOISIR UN MODE</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-gamepad"/></svg></span>CHOISIR UN MODE</div>
 
       <!-- Classique -->
       <div class="mode-solo-item" onclick="selectionnerMode('classique')">
-        <div class="mode-icone">📝</div>
+        <div class="mode-icone"><span class="ic" style=""><svg width="32" height="32"><use href="#ic-pencil"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom">CLASSIQUE</div>
           <div class="mode-desc">10 tours · Toutes catégories · Validation dictionnaire</div>
@@ -468,7 +521,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
       <!-- Chrono -->
       <div class="mode-solo-item" onclick="selectionnerMode('chrono')">
-        <div class="mode-icone">⚡</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--or);"><svg width="32" height="32"><use href="#ic-zap"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom">CHRONO INFERNO</div>
           <div class="mode-desc">30s par tour · Le plus de points possible · Ultra rapide</div>
@@ -478,7 +531,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
       <!-- Survie -->
       <div class="mode-solo-item" onclick="selectionnerMode('survie')">
-        <div class="mode-icone">❤️</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--rose);"><svg width="32" height="32"><use href="#ic-heart"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom">SURVIE</div>
           <div class="mode-desc">3 vies · Un mot vide ou invalide = -1 vie · Jusqu'à la mort</div>
@@ -488,7 +541,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
       <!-- Entraînement -->
       <div class="mode-solo-item" onclick="selectionnerMode('entrainement')">
-        <div class="mode-icone">🎓</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--vert);"><svg width="32" height="32"><use href="#ic-cap"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom">ENTRAÎNEMENT</div>
           <div class="mode-desc">Pas de timer · Pas de pression · Apprends à ton rythme</div>
@@ -498,7 +551,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
       <!-- Catégorie unique -->
       <div class="mode-solo-item" onclick="selectionnerMode('categorie')">
-        <div class="mode-icone">🎯</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--or);"><svg width="32" height="32"><use href="#ic-target"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom">CATÉGORIE UNIQUE</div>
           <div class="mode-desc">Choisis 1 catégorie · Maîtrise-la parfaitement</div>
@@ -508,7 +561,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
       <!-- Lettres difficiles -->
       <div class="mode-solo-item" onclick="selectionnerMode('difficile')">
-        <div class="mode-icone">💀</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--rose);"><svg width="32" height="32"><use href="#ic-skull"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom">LETTRES DIFFICILES</div>
           <div class="mode-desc">Seulement W·X·Z·Q·K·Y · Pour les experts</div>
@@ -518,32 +571,32 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
       <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px;">
         <div style="flex:1;height:1px;background:var(--bord);"></div>
-        <div style="font-family:'Orbitron',monospace;font-size:.62rem;color:var(--or);letter-spacing:2px;">🤖 PLAYBOT</div>
+        <div style="font-family:'Orbitron',monospace;font-size:.62rem;color:var(--or);letter-spacing:2px;"><span class="ic" style="color:var(--or);margin-right:6px;"><svg width="16" height="16"><use href="#ic-robot"/></svg></span>PLAYBOT</div>
         <div style="flex:1;height:1px;background:var(--bord);"></div>
       </div>
 
       <!-- PlayBot Dictée -->
       <div class="mode-solo-item playbot-item" onclick="selectionnerMode('pb_dictee')">
-        <div class="mode-icone">🔊</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--cyan);"><svg width="32" height="32"><use href="#ic-speaker"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom" style="color:var(--cyan);">PLAYBOT — DICTÉE</div>
-          <div class="mode-desc">PlayBot dit un mot à voix haute 🔊 · Tu dois l'écrire correctement · Plus c'est vite, plus tu gagnes</div>
+          <div class="mode-desc">PlayBot dit un mot à voix haute <span class="ic" style="color:var(--cyan);margin-right:4px;"><svg width="14" height="14"><use href="#ic-speaker"/></svg></span>· Tu dois l'écrire correctement · Plus c'est vite, plus tu gagnes</div>
         </div>
         <div class="mode-arrow" style="color:var(--cyan);">›</div>
       </div>
 
       <!-- PlayBot Rafale -->
       <div class="mode-solo-item playbot-item" onclick="selectionnerMode('pb_rafale')">
-        <div class="mode-icone">🎤</div>
+        <div class="mode-icone"><span class="ic" style="color:var(--cyan);"><svg width="32" height="32"><use href="#ic-mic"/></svg></span></div>
         <div class="mode-info">
           <div class="mode-nom" style="color:var(--cyan);">PLAYBOT — RAFALE DE MOTS</div>
-          <div class="mode-desc">PlayBot donne une lettre 🔊 · Écris 3, 5 ou 7 mots commençant par cette lettre · Contre la montre !</div>
+          <div class="mode-desc">PlayBot donne une lettre <span class="ic" style="color:var(--cyan);margin-right:4px;"><svg width="14" height="14"><use href="#ic-speaker"/></svg></span>· Écris 3, 5 ou 7 mots commençant par cette lettre · Contre la montre !</div>
         </div>
         <div class="mode-arrow" style="color:var(--cyan);">›</div>
       </div>
 
     </div>
-    <button class="btn btn-fantome" onclick="allerEcran('e-acc')">← RETOUR</button>
+    <button class="btn btn-fantome" onclick="allerEcran('e-acc')"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-arrow-left"/></svg></span>RETOUR</button>
   </div>
 </div>
 
@@ -551,26 +604,26 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-solo-config">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.5rem;" id="sc-titre">📝 CLASSIQUE</div>
+      <div class="logo" style="font-size:1.5rem;" id="sc-titre"><span class="ic" style="margin-right:6px;"><svg width="22" height="22"><use href="#ic-pencil"/></svg></span>CLASSIQUE</div>
       <div class="muet mt2" id="sc-desc"></div>
     </div>
 
     <!-- Difficulté -->
     <div class="carte mb4">
-      <div class="titre-carte">🎚️ DIFFICULTÉ</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-sliders"/></svg></span>DIFFICULTÉ</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
         <div class="btn-diff actif" id="diff-facile" onclick="selDiff('facile')">
-          <div style="font-size:1.4rem;">🟢</div>
+          <div><span class="ic" style=""><svg width="22" height="22"><use href="#ic-dot-green"/></svg></span></div>
           <div class="orb" style="font-size:.62rem;color:var(--vert);">FACILE</div>
           <div style="font-size:.6rem;color:var(--muet);">64s · Lettres courantes</div>
         </div>
         <div class="btn-diff" id="diff-moyen" onclick="selDiff('moyen')">
-          <div style="font-size:1.4rem;">🟡</div>
+          <div><span class="ic" style=""><svg width="22" height="22"><use href="#ic-dot-yellow"/></svg></span></div>
           <div class="orb" style="font-size:.62rem;color:var(--or);">MOYEN</div>
           <div style="font-size:.6rem;color:var(--muet);">79s · Mixte</div>
         </div>
         <div class="btn-diff" id="diff-difficile" onclick="selDiff('difficile')">
-          <div style="font-size:1.4rem;">🔴</div>
+          <div><span class="ic" style=""><svg width="22" height="22"><use href="#ic-dot-red"/></svg></span></div>
           <div class="orb" style="font-size:.62rem;color:var(--rose);">DIFFICILE</div>
           <div style="font-size:.6rem;color:var(--muet);">94s · Lettres rares</div>
         </div>
@@ -579,13 +632,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
     <!-- Catégorie unique : choix -->
     <div class="carte mb4" id="sc-cat-choix" style="display:none;">
-      <div class="titre-carte">📂 CHOISIR LA CATÉGORIE</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-folder"/></svg></span>CHOISIR LA CATÉGORIE</div>
       <div id="liste-cats-solo"></div>
     </div>
 
     <!-- Nb tours (classique/survie) -->
     <div class="carte mb4" id="sc-tours-choix">
-      <div class="titre-carte">🔢 NOMBRE DE TOURS</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-hash"/></svg></span>NOMBRE DE TOURS</div>
       <select class="champ" id="sc-nb-tours">
         <option value="5">5 tours</option>
         <option value="10" selected>10 tours</option>
@@ -594,8 +647,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       </select>
     </div>
 
-    <button class="btn btn-vert" onclick="lancerSolo()">▶ LANCER</button>
-    <button class="btn btn-fantome mt2" onclick="allerEcran('e-solo')">← RETOUR</button>
+    <button class="btn btn-vert" onclick="lancerSolo()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-play"/></svg></span>LANCER</button>
+    <button class="btn btn-fantome mt2" onclick="allerEcran('e-solo')"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-arrow-left"/></svg></span>RETOUR</button>
   </div>
 </div>
 
@@ -603,7 +656,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-solo-fin">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.7rem;" id="sf-titre">🏁 RÉSULTAT</div>
+      <div class="logo" style="font-size:1.7rem;" id="sf-titre"><span class="ic" style="margin-right:8px;"><svg width="24" height="24"><use href="#ic-flag"/></svg></span>RÉSULTAT</div>
     </div>
     <div class="carte tc mb4">
       <div class="muet orb" style="letter-spacing:3px;font-size:.7rem;">TON SCORE</div>
@@ -613,16 +666,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     </div>
     <!-- Détail par tour -->
     <div class="carte mb4">
-      <div class="titre-carte">📋 DÉTAIL</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-list"/></svg></span>DÉTAIL</div>
       <div id="sf-detail"></div>
     </div>
     <div id="sf-vies" class="carte tc mb4" style="display:none;">
       <div class="muet orb" style="font-size:.72rem;letter-spacing:2px;">VIES RESTANTES</div>
       <div id="sf-vies-aff" style="font-size:2rem;margin-top:6px;"></div>
     </div>
-    <button class="btn btn-vert" onclick="rejouerSolo()">🔄 REJOUER</button>
-    <button class="btn btn-or mt2" onclick="allerSolo()">🎯 CHANGER DE MODE</button>
-    <button class="btn btn-fantome mt2" onclick="retourMenu()">🏠 MENU</button>
+    <button class="btn btn-vert" onclick="rejouerSolo()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-refresh"/></svg></span>REJOUER</button>
+    <button class="btn btn-or mt2" onclick="allerSolo()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-target"/></svg></span>CHANGER DE MODE</button>
+    <button class="btn btn-fantome mt2" onclick="retourMenu()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-home"/></svg></span>MENU</button>
   </div>
 </div>
 
@@ -630,12 +683,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-pb-dictee">
   <div style="width:100%;max-width:480px;padding-top:30px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.5rem;">🤖 PLAYBOT DICTÉE</div>
+      <div class="logo" style="font-size:1.5rem;"><span class="ic" style="margin-right:8px;"><svg width="24" height="24"><use href="#ic-robot"/></svg></span>PLAYBOT DICTÉE</div>
       <div class="muet mt2">Écoute et écris le mot correctement !</div>
     </div>
     <!-- Bot animé -->
     <div class="tc" style="margin-bottom:20px;">
-      <div id="pb-bot-anim" style="font-size:5rem;animation:botPulse 1s ease-in-out infinite;">🤖</div>
+      <div id="pb-bot-anim" class="bot-svg" style="animation:botPulse 1s ease-in-out infinite;"><span class="ic" style="color:var(--cyan);"><svg width="72" height="72"><use href="#ic-robot"/></svg></span></div>
       <div id="pb-bot-bulle" class="bot-bulle">Je prépare un mot pour toi...</div>
     </div>
     <!-- Timer -->
@@ -649,12 +702,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     </div>
     <!-- Zone saisie -->
     <div class="carte mb4">
-      <div class="titre-carte" id="pb-consigne">🔊 Écoute bien...</div>
+      <div class="titre-carte" id="pb-consigne"><span class="ic" style="color:var(--cyan);margin-right:6px;"><svg width="16" height="16"><use href="#ic-speaker"/></svg></span>Écoute bien...</div>
       <div style="display:flex;gap:8px;align-items:center;">
         <input class="champ" id="pb-rep" type="text" placeholder="Écris le mot ici..." autocomplete="off" autocorrect="off" style="font-size:1.2rem;font-weight:700;flex:1;" disabled>
-        <button class="btn btn-cyan" style="width:52px;padding:12px 0;font-size:1.2rem;" onclick="pbReecouter()" id="pb-btn-son" disabled>🔊</button>
+        <button class="btn btn-cyan" style="width:52px;padding:12px 0;font-size:1.2rem;" onclick="pbReecouter()" id="pb-btn-son" disabled><span class="ic"><svg width="20" height="20"><use href="#ic-speaker"/></svg></span></button>
       </div>
-      <button class="btn btn-or mt2" onclick="pbValider()" id="pb-btn-val" disabled>✅ VALIDER</button>
+      <button class="btn btn-or mt2" onclick="pbValider()" id="pb-btn-val" disabled><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-check"/></svg></span>VALIDER</button>
     </div>
     <!-- Feedback -->
     <div id="pb-feedback" style="display:none;" class="carte tc mb4">
@@ -662,7 +715,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div id="pb-feedback-txt" class="orb" style="font-size:1rem;margin-top:8px;"></div>
       <div id="pb-feedback-mot" style="font-size:.82rem;color:var(--muet);margin-top:4px;"></div>
     </div>
-    <button class="btn btn-rose" onclick="pbAbandonner()">⛔ ABANDONNER</button>
+    <button class="btn btn-rose" onclick="pbAbandonner()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-stop"/></svg></span>ABANDONNER</button>
   </div>
 </div>
 
@@ -670,12 +723,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-pb-rafale">
   <div style="width:100%;max-width:480px;padding-top:30px;">
     <div class="tc mb4">
-      <div class="logo" style="font-size:1.5rem;">🤖 PLAYBOT RAFALE</div>
+      <div class="logo" style="font-size:1.5rem;"><span class="ic" style="margin-right:8px;"><svg width="24" height="24"><use href="#ic-robot"/></svg></span>PLAYBOT RAFALE</div>
       <div class="muet mt2">Écris un maximum de mots commençant par la lettre donnée !</div>
     </div>
     <!-- Bot + lettre -->
     <div class="tc" style="margin-bottom:16px;">
-      <div id="pbr-bot-anim" style="font-size:4rem;animation:botPulse 1.2s ease-in-out infinite;">🤖</div>
+      <div id="pbr-bot-anim" class="bot-svg" style="animation:botPulse 1.2s ease-in-out infinite;"><span class="ic" style="color:var(--cyan);"><svg width="64" height="64"><use href="#ic-robot"/></svg></span></div>
       <div id="pbr-bot-bulle" class="bot-bulle">Je choisis une lettre...</div>
     </div>
     <!-- Infos tour -->
@@ -703,10 +756,10 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     </div>
     <!-- Liste mots trouvés -->
     <div class="carte mb4">
-      <div class="titre-carte">MES MOTS ✅</div>
+      <div class="titre-carte">MES MOTS <span class="ic" style="color:var(--vert);"><svg width="16" height="16"><use href="#ic-check"/></svg></span></div>
       <div id="pbr-liste-mots" style="min-height:40px;display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
-    <button class="btn btn-rose" onclick="pbrAbandonner()">⛔ ABANDONNER</button>
+    <button class="btn btn-rose" onclick="pbrAbandonner()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-stop"/></svg></span>ABANDONNER</button>
   </div>
 </div>
 
@@ -714,21 +767,21 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <div class="ecran" id="e-pb-fin">
   <div style="width:100%;max-width:480px;padding-top:20px;">
     <div class="tc mb4">
-      <div id="pbf-titre" class="logo" style="font-size:1.7rem;">🤖 RÉSULTAT PLAYBOT</div>
+      <div id="pbf-titre" class="logo" style="font-size:1.7rem;"><span class="ic" style="margin-right:8px;"><svg width="24" height="24"><use href="#ic-robot"/></svg></span>RÉSULTAT PLAYBOT</div>
     </div>
     <div class="carte tc mb4">
-      <div id="pbf-bot" style="font-size:4rem;">🤖</div>
+      <div id="pbf-bot" class="bot-svg"><span class="ic" style="color:var(--cyan);"><svg width="64" height="64"><use href="#ic-robot"/></svg></span></div>
       <div id="pbf-commentaire" class="bot-bulle" style="margin:10px auto;max-width:300px;"></div>
       <div class="orb" style="font-size:3rem;font-weight:900;color:var(--or);margin:10px 0;" id="pbf-score"></div>
       <div id="pbf-record" style="font-family:'Orbitron',monospace;font-size:.75rem;color:var(--vert);"></div>
     </div>
     <div class="carte mb4">
-      <div class="titre-carte">📋 DÉTAIL</div>
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-list"/></svg></span>DÉTAIL</div>
       <div id="pbf-detail"></div>
     </div>
-    <button class="btn btn-vert" onclick="pbRejouer()" id="pbf-replay-mode">🔄 REJOUER</button>
-    <button class="btn btn-or mt2" onclick="allerSolo()">🎯 AUTRES MODES</button>
-    <button class="btn btn-fantome mt2" onclick="retourMenu()">🏠 MENU</button>
+    <button class="btn btn-vert" onclick="pbRejouer()" id="pbf-replay-mode"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-refresh"/></svg></span>REJOUER</button>
+    <button class="btn btn-or mt2" onclick="allerSolo()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-target"/></svg></span>AUTRES MODES</button>
+    <button class="btn btn-fantome mt2" onclick="retourMenu()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-home"/></svg></span>MENU</button>
   </div>
 </div>
 
@@ -737,17 +790,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <!-- MODAL ARRÊT -->
 <div class="mf" id="modal-arret" style="display:none;">
   <div class="mb">
-    <div class="mt">⛔ ARRÊTER LA PARTIE ?</div>
+    <div class="mt"><span class="ic" style="color:var(--rose);margin-right:8px;"><svg width="22" height="22"><use href="#ic-stop"/></svg></span>ARRÊTER LA PARTIE ?</div>
     <div class="muet tc mb4" style="font-size:.84rem;">La partie sera annulée pour tous les joueurs du salon.</div>
-    <button class="btn btn-rose" onclick="confirmerArret()">⛔ OUI, ARRÊTER</button>
-    <button class="btn btn-fantome mt2" onclick="fermerModal()">↩ CONTINUER</button>
+    <button class="btn btn-rose" onclick="confirmerArret()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-stop"/></svg></span>OUI, ARRÊTER</button>
+    <button class="btn btn-fantome mt2" onclick="fermerModal()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-arrow-left"/></svg></span>CONTINUER</button>
   </div>
 </div>
 
 <!-- PANNEAU INDICE -->
 <div class="pf" id="pan-ind" style="display:none;" onclick="fermPan(event)">
   <div class="pc" onclick="event.stopPropagation()">
-    <div class="pt-ind">💡 UTILISER UN INDICE</div>
+    <div class="pt-ind"><span class="ic" style="color:var(--or);margin-right:8px;"><svg width="22" height="22"><use href="#ic-bulb"/></svg></span>UTILISER UN INDICE</div>
     <div class="rp" style="margin-bottom:10px;" id="ind-p"></div>
     <div style="font-size:.76rem;color:var(--muet);margin-bottom:10px;text-align:center;">Lettre : <strong id="ind-l" style="color:var(--or);">?</strong> — 1 indice par case</div>
     <div id="ind-cats"></div>
@@ -798,10 +851,10 @@ const CATS = [
   {id:'animal', label:'Animal',        pts:8, celeb:false},
   {id:'metier', label:'Métier',        pts:8, celeb:false},
   {id:'marque', label:'Marque',        pts:8, celeb:false},
-  {id:'celeb',  label:'Célébrité ⭐',  pts:5, celeb:true },
+  {id:'celeb',  label:'Célébrité',  pts:5, celeb:true },
 ];
 const BONUS_MAX = 15;
-const EMOJIS = ['🦊','🐺','🦁','🐯','🦋','🐉','🦅','🐬','🦄','🌟','🔥','⚡','🎭','🎯','💎','🏆','🐸','🦈','🦉','🐲'];
+const EMOJIS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'];
 const BIBLIO = [
   {id:'b01',url:'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix&backgroundColor=b6e3f4'},
   {id:'b02',url:'https://api.dicebear.com/7.x/adventurer/svg?seed=Bella&backgroundColor=ffdfbf'},
@@ -830,20 +883,20 @@ const IDX = {
   celeb:{A:'Adele',B:'Beyoncé',C:'Cristiano',D:'Drake',E:'Elon Musk',F:'Federer',G:'Gigi Hadid',H:'Harry Styles',I:'Idris Elba',J:'Jay-Z',L:'LeBron',M:'Mbappé',N:'Neymar',O:'Obama',P:'Post Malone',R:'Rihanna',S:'Shakira',T:'Taylor Swift',V:'Valentino',W:'Will Smith',X:'Xavier Dolan',Y:'Yannick Noah',Z:'Zidane',Q:'Quavo'},
 };
 const ARTS = [
-  {id:'cadre_or',   nom:'Cadre Doré',         desc:'Bordure dorée sur ton avatar',  cout:5,monnaie:'or',    icone:'🖼️'},
-  {id:'cadre_neon', nom:'Cadre Néon',          desc:'Bordure néon sur ton avatar',   cout:3,monnaie:'argent',icone:'✨'},
-  {id:'titre_leg',  nom:'Titre : LÉGENDE',     desc:'Affiché sous ton pseudo',       cout:8,monnaie:'or',    icone:'👑'},
-  {id:'titre_as',   nom:'Titre : AS DES MOTS', desc:'Affiché sous ton pseudo',       cout:5,monnaie:'argent',icone:'🃏'},
-  {id:'titre_genie',nom:'Titre : GÉNIE',       desc:'Affiché sous ton pseudo',       cout:3,monnaie:'bronze',icone:'🧠'},
+  {id:'cadre_or',   nom:'Cadre Doré',         desc:'Bordure dorée sur ton avatar',  cout:5,monnaie:'or',    icone:'ART'},
+  {id:'cadre_neon', nom:'Cadre Néon',          desc:'Bordure néon sur ton avatar',   cout:3,monnaie:'argent',icone:'NÉO'},
+  {id:'titre_leg',  nom:'Titre : LÉGENDE',     desc:'Affiché sous ton pseudo',       cout:8,monnaie:'or',    icone:'LEG'},
+  {id:'titre_as',   nom:'Titre : AS DES MOTS', desc:'Affiché sous ton pseudo',       cout:5,monnaie:'argent',icone:'AS'},
+  {id:'titre_genie',nom:'Titre : GÉNIE',       desc:'Affiché sous ton pseudo',       cout:3,monnaie:'bronze',icone:'GEN'},
 ];
 const PACKS = [
-  {id:'pk5', nom:'Pack 5 Indices', desc:'5 indices pour tes prochaines parties', cout:2,monnaie:'or',    icone:'💡', qte:5 },
-  {id:'pk10',nom:'Pack 10 Indices',desc:'10 indices pour tes prochaines parties',cout:4,monnaie:'or',    icone:'💡💡',qte:10},
-  {id:'pk3a',nom:'Pack 3 Indices', desc:'3 indices pour tes prochaines parties', cout:3,monnaie:'argent',icone:'🔦', qte:3 },
+  {id:'pk5', nom:'Pack 5 Indices', desc:'5 indices pour tes prochaines parties', cout:2,monnaie:'or',    icone:'IDX', qte:5 },
+  {id:'pk10',nom:'Pack 10 Indices',desc:'10 indices pour tes prochaines parties',cout:4,monnaie:'or',    icone:'IDX',qte:10},
+  {id:'pk3a',nom:'Pack 3 Indices', desc:'3 indices pour tes prochaines parties', cout:3,monnaie:'argent',icone:'IDX', qte:3 },
 ];
 
 // ══════════════ ÉTAT ══════════════
-let J = {uid:'',pseudo:'',emoji:'🦊',avatarImg:null,biid:null,pieces:{or:0,argent:0,bronze:0},debloques:[],indices:3,titreEquipe:null};
+let J = {uid:'',pseudo:'',emoji:'',avatarImg:null,biid:null,pieces:{or:0,argent:0,bronze:0},debloques:[],indices:3,titreEquipe:null};
 let salonData = null;
 let estHote = false;
 let lettreActuelle = '';
@@ -921,7 +974,7 @@ function traiterPhoto(e) {
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader(); r.onload=ev=>{ J.avatarImg=ev.target.result; J.biid='custom';
     document.getElementById('img-ap').src=ev.target.result; document.getElementById('apercu').style.display='block';
-    majApProfil(); notif('Photo chargée 📸','s'); }; r.readAsDataURL(f);
+    majApProfil(); notif('Photo chargée !','s'); }; r.readAsDataURL(f);
 }
 function majApProfil() {
   const el=document.getElementById('p-av'); if(!el) return;
@@ -931,19 +984,19 @@ function majApProfil() {
 function setAv(el,joueur) {
   el.innerHTML='';
   if(joueur.avatarImg){ const img=document.createElement('img'); img.src=joueur.avatarImg; el.appendChild(img); }
-  else { const sp=document.createElement('span'); sp.textContent=joueur.emoji||'🦊'; el.appendChild(sp); }
-  const ov=document.createElement('div'); ov.className='av-ov'; ov.textContent='✏️'; el.appendChild(ov);
+  else { const sp=document.createElement('span'); sp.textContent=''; el.appendChild(sp); }
+  const ov=document.createElement('div'); ov.className='av-ov'; ov.innerHTML='<span class="ic" style="color:#fff;"><svg width="18" height="18"><use href="#ic-pencil"/></svg></span>'; el.appendChild(ov);
 }
 function getTitre() {
-  if((J.debloques||[]).includes('titre_leg')) return '👑 LÉGENDE';
-  if((J.debloques||[]).includes('titre_as')) return '🃏 AS DES MOTS';
-  if((J.debloques||[]).includes('titre_genie')) return '🧠 GÉNIE';
+  if((J.debloques||[]).includes('titre_leg')) return 'LÉGENDE';
+  if((J.debloques||[]).includes('titre_as')) return 'AS DES MOTS';
+  if((J.debloques||[]).includes('titre_genie')) return 'GÉNIE';
   return '';
 }
 function sauvegarderProfil() {
   const p=document.getElementById('p-pseudo').value.trim();
   if(!p){notif('Entre un pseudo !','e');return;}
-  J.pseudo=p; sauvegarderLocal(); rafAcc(); notif('Profil sauvegardé ✅','s');
+  J.pseudo=p; sauvegarderLocal(); rafAcc(); notif('Profil sauvegardé !','s');
   setTimeout(()=>allerEcran('e-acc'),700);
 }
 function rafAcc() {
@@ -956,7 +1009,7 @@ function rafAcc() {
   rafPieces();
 }
 function rafPieces() {
-  const p=J.pieces,h=`<div class="bp p-or">🥇 ${p.or||0}</div><div class="bp p-ag">🥈 ${p.argent||0}</div><div class="bp p-br">🥉 ${p.bronze||0}</div>`;
+  const p=J.pieces,h=`<div class="bp p-or">Or ${p.or||0}</div><div class="bp p-ag">Ag ${p.argent||0}</div><div class="bp p-br">Br ${p.bronze||0}</div>`;
   ['acc-pieces','p-pieces','bout-p'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=h;});
 }
 
@@ -971,7 +1024,7 @@ async function allerCreerSalon() {
     await set(ref(db,`salons/${code}`),salon);
     salonData=salon; salonData.code=code;
     ecouter(code); ouvrirSalon(code);
-    notif('Salon créé ! 🏟️','s');
+    notif('Salon créé !','s');
   } catch(e){notif('Erreur: '+e.message,'e');console.error(e);}
 }
 
@@ -983,19 +1036,19 @@ async function rejoindre() {
   const btn=document.getElementById('btn-join'); btn.disabled=true; btn.textContent='⏳ Connexion...';
   try {
     const snap=await get(ref(db,`salons/${code}`));
-    if(!snap.exists()){notif('Salon introuvable !','e');btn.disabled=false;btn.textContent='🚀 REJOINDRE';return;}
+    if(!snap.exists()){notif('Salon introuvable !','e');btn.disabled=false;btn.innerHTML='<span class="ic" style="margin-right:7px"><svg width="18" height="18"><use href="#ic-rocket"/></svg></span>REJOINDRE';return;}
     const data=snap.val();
-    if(data.etat!=='attente'){notif('Partie déjà commencée !','e');btn.disabled=false;btn.textContent='🚀 REJOINDRE';return;}
+    if(data.etat!=='attente'){notif('Partie déjà commencée !','e');btn.disabled=false;btn.innerHTML='<span class="ic" style="margin-right:7px"><svg width="18" height="18"><use href="#ic-rocket"/></svg></span>REJOINDRE';return;}
     // Vérifier doublons de pseudo
     const psExist=Object.entries(data.joueurs||{}).filter(([uid])=>uid!==J.uid).map(([,j])=>j.pseudo.toLowerCase());
-    if(psExist.includes(J.pseudo.toLowerCase())){notif('Pseudo déjà pris dans ce salon !','e');btn.disabled=false;btn.textContent='🚀 REJOINDRE';return;}
+    if(psExist.includes(J.pseudo.toLowerCase())){notif('Pseudo déjà pris dans ce salon !','e');btn.disabled=false;btn.innerHTML='<span class="ic" style="margin-right:7px"><svg width="18" height="18"><use href="#ic-rocket"/></svg></span>REJOINDRE';return;}
     estHote=false; salonData=data; salonData.code=code;
     const jData={pseudo:J.pseudo,emoji:J.emoji,avatarImg:J.avatarImg||null,estHote:false,connecte:true,scores:Array(data.parametres.tours).fill(0),uid:J.uid};
     await update(ref(db,`salons/${code}/joueurs/${J.uid}`),jData);
     ecouter(code); ouvrirSalon(code);
-    notif('Salon rejoint ! 🎮','s');
+    notif('Salon rejoint !','s');
   } catch(e){notif('Erreur: '+e.message,'e');console.error(e);}
-  btn.disabled=false; btn.textContent='🚀 REJOINDRE';
+  btn.disabled=false; btn.innerHTML='<span class="ic" style="margin-right:7px"><svg width="18" height="18"><use href="#ic-rocket"/></svg></span>REJOINDRE';
 }
 
 // ══════════════ LISTENER SALON ══════════════
@@ -1038,7 +1091,7 @@ function ecouter(code) {
     }
     // Afficher overlay "validation en cours" si l'hôte valide
     if (data.validation_en_cours && ecJeu) {
-      document.getElementById('oa-txt').textContent = '🔍 Vérification des mots en cours...';
+      document.getElementById('oa-txt').textContent = 'Vérification des mots...';
     }
     if(estHote && etat.endsWith('_jeu')) {
       const tn=parseInt(etat.split('_')[1]);
@@ -1064,7 +1117,7 @@ function majListeJ(joueurs) {
   const l=document.getElementById('liste-j'); l.innerHTML='';
   Object.values(joueurs).forEach(j=>{
     const li=document.createElement('li'); li.className='ij';
-    const avH=j.avatarImg?`<img src="${j.avatarImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<span style="font-size:1.3rem;">${j.emoji||'🦊'}</span>`;
+    const avH=j.avatarImg?`<img src="${j.avatarImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<span class='ic' style='color:var(--cyan)'><svg width='22' height='22'><use href='#ic-user'/></svg></span>`;
     li.innerHTML=`${avH}<span class="ptj${j.connecte?'':' off'}"></span><span class="nj">${j.pseudo}</span>${j.estHote?'<span class="bh">HÔTE</span>':''}`;
     l.appendChild(li);
   });
@@ -1361,35 +1414,35 @@ function affRT(tn,data,res) {
   const triés=Object.entries(sf).sort((a,b)=>b[1].score-a[1].score);
   const liste=document.getElementById('rt-liste'); liste.innerHTML='';
   triés.forEach(([uid,sd],idx)=>{
-    const moi=uid===J.uid, j=data.joueurs?.[uid]||{emoji:'🦊',pseudo:sd.pseudo};
+    const moi=uid===J.uid, j=data.joueurs?.[uid]||{emoji:'',pseudo:sd.pseudo};
     const c=document.createElement('div'); c.className='cr'; if(moi)c.style.border='1px solid var(--cyan)';
-    const rk=idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1), rkcls=idx===0?'r1':idx===1?'r2':idx===2?'r3':'';
+    const rk=idx===0?'1°':idx===1?'2°':idx===2?'3°':'#'+(idx+1), rkcls=idx===0?'r1':idx===1?'r2':idx===2?'r3':'';
     let ligs=CATS.map(cat=>{ const d=sd.detail?.[cat.id]; if(!d)return '';
       const cls=d.statut==='valide'?'tv':d.statut==='doublon'||d.statut==='invalide'||d.statut==='mauvaise_lettre'?'tdu':'';
-      const icone=d.statut==='valide'?'✅':d.statut==='doublon'?'🔁':d.statut==='invalide'?'❌':d.statut==='mauvaise_lettre'?'⚠️':'—';
+      const icone=d.statut==='valide'?'✓':d.statut==='doublon'?'↺':d.statut==='invalide'?'✗':d.statut==='mauvaise_lettre'?'!':'—';
       return `<tr><td style="text-align:left;padding:3px 5px;font-size:.7rem;color:var(--muet);">${cat.label.replace('⭐','')}</td><td class="${cls}" title="${d.statut}">${d.val||'—'} ${d.val?icone:''}</td><td class="${d.statut==='valide'?'tv':''}">${d.pts>0?'+'+d.pts:0}</td></tr>`; }).join('');
-    if(sd.bonus)ligs+=`<tr><td style="text-align:left;padding:3px 5px;font-size:.7rem;color:var(--muet);">🚀 Rapidité</td><td></td><td class="tb">+${sd.bonus}</td></tr>`;
-    const avH=j.avatarImg?`<img src="${j.avatarImg}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`:`<span style="font-size:1.4rem;">${j.emoji||'🦊'}</span>`;
+    if(sd.bonus)ligs+=`<tr><td style="text-align:left;padding:3px 5px;font-size:.7rem;color:var(--muet);">Rapidité</td><td></td><td class="tb">+${sd.bonus}</td></tr>`;
+    const avH=j.avatarImg?`<img src="${j.avatarImg}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`:`<span class='ic' style='color:var(--cyan)'><svg width='24' height='24'><use href='#ic-user'/></svg></span>`;
     c.innerHTML=`<div class="jr"><div class="rg ${rkcls}">${rk}</div>${avH}<div class="nr">${sd.pseudo}${moi?' <span style="color:var(--cyan);font-size:.72rem;">(Toi)</span>':''}</div><div class="sr">${sd.score}pts</div></div><div style="margin-top:9px;overflow-x:auto;"><table class="td"><tbody>${ligs}</tbody></table></div>`;
     liste.appendChild(c);
   });
   // Doublons
   const dl=[];
-  Object.entries(dubs||{}).forEach(([cid,vals])=>vals.forEach(v=>{ const cat=CATS.find(c=>c.id===cid); dl.push(`<span class="rose">🔁 "${v}"</span> <span class="muet">(${cat?.label?.replace('⭐','')||cid})</span>`); }));
+  Object.entries(dubs||{}).forEach(([cid,vals])=>vals.forEach(v=>{ const cat=CATS.find(c=>c.id===cid); dl.push(`<span class="rose">"${v}"</span> <span class="muet">(${cat?.label?.replace('⭐','')||cid})</span>`); }));
   // Collecter mots invalides depuis tous les joueurs
   const invalides=[];
-  Object.values(sf).forEach(jd=>{ CATS.forEach(cat=>{ const d=jd.detail?.[cat.id]; if(d&&d.statut==='invalide') invalides.push(`<span class="rose">❌ "${d.val}"</span> <span class="muet">(${cat.label.replace('⭐','')} — mot inexistant)</span>`); }); });
+  Object.values(sf).forEach(jd=>{ CATS.forEach(cat=>{ const d=jd.detail?.[cat.id]; if(d&&d.statut==='invalide') invalides.push(`<span class="rose">"${d.val}"</span> <span class="muet">(${cat.label.replace('⭐','')} — mot inexistant)</span>`); }); });
   const toutDL=[...dl,...invalides.filter((v,i,a)=>a.indexOf(v)===i)];
-  document.getElementById('rt-dub').innerHTML=toutDL.length?toutDL.join('<br>'):'Aucun doublon ni mot invalide ✅';
+  document.getElementById('rt-dub').innerHTML=toutDL.length?toutDL.join('<br>'):'Aucun doublon ni mot invalide';
   // Contrôles
   const ctrl=document.getElementById('rt-ctrl');
   if(tn<data.parametres.tours){
     ctrl.innerHTML=estHote
-      ?`<button class="btn btn-cyan" onclick="passerTour(${tn})">▶ TOUR SUIVANT (${tn+1}/${data.parametres.tours})</button><button class="btn btn-rose mt2" onclick="confirmerArret()">⛔ ARRÊTER</button>`
+      ?`<button class="btn btn-cyan" onclick="passerTour(${tn})"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-play"/></svg></span>TOUR SUIVANT (${tn+1}/${data.parametres.tours})</button><button class="btn btn-rose mt2" onclick="confirmerArret()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-stop"/></svg></span>ARRÊTER</button>`
       :`<div class="tc"><div class="spin"></div><div class="muet">En attente de l'hôte...</div></div>`;
   } else {
     ctrl.innerHTML=estHote
-      ?`<button class="btn btn-or" onclick="terminer()">🏆 RÉSULTATS FINAUX</button>`
+      ?`<button class="btn btn-or" onclick="terminer()">RÉSULTATS FINAUX</button>`
       :`<div class="tc"><div class="spin"></div><div class="muet">En attente des résultats...</div></div>`;
   }
   allerEcran('e-rt');
@@ -1407,37 +1460,37 @@ function affFin(data) {
   // Podium
   const pod=document.getElementById('fn-podium'); pod.innerHTML='';
   totaux.slice(0,3).forEach((jd,i)=>{
-    const med=['🥇','🥈','🥉'],col=['var(--or)','#C0C0C0','#CD7F32'];
+    const med=['1','2','3'],col=['var(--or)','#C0C0C0','#CD7F32'];
     const d=document.createElement('div'); d.className='cr'; d.style.borderColor=col[i]; d.style.boxShadow=`0 0 20px ${col[i]}22`;
-    const avH=jd.avatarImg?`<img src="${jd.avatarImg}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`:`<span style="font-size:1.6rem;">${jd.emoji||'🦊'}</span>`;
+    const avH=jd.avatarImg?`<img src="${jd.avatarImg}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`:`<span class='ic' style='color:var(--cyan)'><svg width='26' height='26'><use href='#ic-user'/></svg></span>`;
     d.innerHTML=`<div class="jr"><div class="rg" style="color:${col[i]};text-shadow:0 0 15px ${col[i]}">${med[i]}</div>${avH}<div class="nr" style="font-size:1.05rem;font-weight:700;">${jd.pseudo}</div><div class="sr" style="font-size:1.2rem;color:${col[i]}">${jd.total}pts</div></div>`;
     pod.appendChild(d);
   });
   // Tableau
   const nb=data.parametres.tours, ths=Array.from({length:nb},(_,i)=>`<th style="padding:3px;color:var(--muet);font-family:'Orbitron',monospace;font-size:.55rem;">T${i+1}</th>`).join('');
-  document.getElementById('fn-tab').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.76rem;"><tr><th style="text-align:left;padding:5px;color:var(--cyan);font-family:'Orbitron',monospace;">Joueur</th>${ths}<th style="padding:3px;color:var(--or);font-family:'Orbitron',monospace;">TOT</th></tr>${totaux.map(jd=>`<tr><td style="padding:5px;font-weight:600;font-size:.8rem;">${jd.emoji||'🦊'} ${jd.pseudo}</td>${(jd.scores||[]).map(s=>`<td style="padding:3px;text-align:center;color:var(--muet);font-size:.73rem;">${s}</td>`).join('')}<td style="padding:3px;text-align:center;color:var(--or);font-family:'Orbitron',monospace;font-weight:700;">${jd.total}</td></tr>`).join('')}</table>`;
+  document.getElementById('fn-tab').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.76rem;"><tr><th style="text-align:left;padding:5px;color:var(--cyan);font-family:'Orbitron',monospace;">Joueur</th>${ths}<th style="padding:3px;color:var(--or);font-family:'Orbitron',monospace;">TOT</th></tr>${totaux.map(jd=>`<tr><td style="padding:5px;font-weight:600;font-size:.8rem;">${jd.pseudo}</td>${(jd.scores||[]).map(s=>`<td style="padding:3px;text-align:center;color:var(--muet);font-size:.73rem;">${s}</td>`).join('')}<td style="padding:3px;text-align:center;color:var(--or);font-family:'Orbitron',monospace;font-weight:700;">${jd.total}</td></tr>`).join('')}</table>`;
   // Récompense
   const monR=totaux.findIndex(jd=>jd.uid===J.uid);
   const rd=document.getElementById('fn-rec'),rt=document.getElementById('fn-rec-txt');
-  if(monR===0){J.pieces.or=(J.pieces.or||0)+5;rt.innerHTML='Tu reçois <span class="or orb">+5 🥇 Pièces d\'Or</span> !';rd.style.display='block';confettis();}
-  else if(monR===1){J.pieces.argent=(J.pieces.argent||0)+3;rt.innerHTML='Tu reçois <span style="color:#C0C0C0" class="orb">+3 🥈 Pièces d\'Argent</span> !';rd.style.display='block';}
-  else if(monR===2){J.pieces.bronze=(J.pieces.bronze||0)+1;rt.innerHTML='Tu reçois <span style="color:#CD7F32" class="orb">+1 🥉 Pièce de Bronze</span> !';rd.style.display='block';}
+  if(monR===0){J.pieces.or=(J.pieces.or||0)+5;rt.innerHTML='Tu reçois <span class="or orb">+5 Pièces d\'Or</span> !';rd.style.display='block';confettis();}
+  else if(monR===1){J.pieces.argent=(J.pieces.argent||0)+3;rt.innerHTML='Tu reçois <span style="color:#C0C0C0" class="orb">+3 Pièces d\'Argent</span> !';rd.style.display='block';}
+  else if(monR===2){J.pieces.bronze=(J.pieces.bronze||0)+1;rt.innerHTML='Tu reçois <span style="color:#CD7F32" class="orb">+1 Pièce de Bronze</span> !';rd.style.display='block';}
   else rd.style.display='none';
   sauvegarderLocal(); allerEcran('e-fin');
 }
 
 // ══════════════ INDICE ══════════════
 function ouvrirIndice() {
-  const p=J.pieces; document.getElementById('ind-p').innerHTML=`<div class="bp p-or">🥇 ${p.or||0}</div><div class="bp p-ag">🥈 ${p.argent||0}</div><div class="bp p-br">🥉 ${p.bronze||0}</div>`;
+  const p=J.pieces; document.getElementById('ind-p').innerHTML=`<div class="bp p-or">Or ${p.or||0}</div><div class="bp p-ag">Ag ${p.argent||0}</div><div class="bp p-br">Br ${p.bronze||0}</div>`;
   document.getElementById('ind-l').textContent=lettreActuelle;
   const l=document.getElementById('ind-cats'); l.innerHTML='';
   CATS.forEach(cat=>{ const ind=IDX[cat.id]?.[lettreActuelle]; if(!ind)return; const rempli=(document.getElementById('r-'+cat.id)?.value||'').trim()!==''; const rest=J.indices||0; const peut=!rempli&&rest>0;
     const d=document.createElement('div'); d.className='ii'; d.style.opacity=rempli?'.4':'1';
-    d.innerHTML=`<div style="flex:1;font-size:.9rem;">${cat.label}</div><div style="text-align:right;"><div style="font-family:'Orbitron',monospace;font-size:.72rem;color:var(--or);">💡 1 indice (${rest} restant${rest>1?'s':''})</div>${!rempli?`<button class="btn btn-fantome" style="padding:5px 11px;font-size:.62rem;margin-top:3px;border-radius:7px;" onclick="useIndice('${cat.id}','${ind}')" ${peut?'':'disabled'}>${peut?'UTILISER':'Aucun indice'}</button>`:'<span class="vert" style="font-size:.73rem;">✅ Rempli</span>'}</div>`;
+    d.innerHTML=`<div style="flex:1;font-size:.9rem;">${cat.label}</div><div style="text-align:right;"><div style="font-family:'Orbitron',monospace;font-size:.72rem;color:var(--or);"><span class="ic" style="color:var(--or);margin-right:4px"><svg width="14" height="14"><use href="#ic-bulb"/></svg></span>1 indice (${rest} restant${rest>1?'s':''})</div>${!rempli?`<button class="btn btn-fantome" style="padding:5px 11px;font-size:.62rem;margin-top:3px;border-radius:7px;" onclick="useIndice('${cat.id}','${ind}')" ${peut?'':'disabled'}>${peut?'UTILISER':'Aucun indice'}</button>`:'<span class="vert" style="font-size:.73rem;">Rempli ✓</span>'}</div>`;
     l.appendChild(d); });
   document.getElementById('pan-ind').style.display='flex';
 }
-function useIndice(cid,val){if((J.indices||0)<1){notif('Aucun indice !','e');return;}J.indices--;sauvegarderLocal();repsLocales[cid]=val;const i=document.getElementById('r-'+cid);if(i)i.value=val;majTotal();notif(`💡 "${val}" ajouté !`,'s');fermPan();}
+function useIndice(cid,val){if((J.indices||0)<1){notif('Aucun indice !','e');return;}J.indices--;sauvegarderLocal();repsLocales[cid]=val;const i=document.getElementById('r-'+cid);if(i)i.value=val;majTotal();notif(`"${val}" ajouté !`,'s');fermPan();}
 function fermPan(e){if(!e||e.target===document.getElementById('pan-ind'))document.getElementById('pan-ind').style.display='none';}
 
 // ══════════════ BOUTIQUE ══════════════
@@ -1447,23 +1500,23 @@ function rendreBoutique() {
   ARTS.forEach(art=>{
     const pos=(J.debloques||[]).includes(art.id),isEq=J.titreEquipe===art.id;
     const p=J.pieces,sol=art.monnaie==='or'?p.or||0:art.monnaie==='argent'?p.argent||0:p.bronze||0;
-    const peut=!pos&&sol>=art.cout,sym=art.monnaie==='or'?'🥇':art.monnaie==='argent'?'🥈':'🥉',cls=art.monnaie==='or'?'btn-or':art.monnaie==='argent'?'btn-cyan':'btn-rose';
+    const peut=!pos&&sol>=art.cout,sym=art.monnaie==='or'?'Or':art.monnaie==='argent'?'Ag':'Br',cls=art.monnaie==='or'?'btn-or':art.monnaie==='argent'?'btn-cyan':'btn-rose';
     const d=document.createElement('div'); d.className='ib';
-    d.innerHTML=`<div class="ico-b">${art.icone}</div><div class="inf-b"><div class="nom-b">${art.nom}</div><div class="des-b">${art.desc}</div><div style="font-family:'Orbitron',monospace;font-size:.72rem;margin-top:4px;">${sym} ${art.cout} pièce${art.cout>1?'s':''} d'${art.monnaie}</div><div style="margin-top:6px;">${pos?`<span class="pos">✅ POSSÉDÉ</span>${art.id.startsWith('titre')?(isEq?`<span class="eq">⚡ ÉQUIPÉ</span><button class="btn btn-fantome bb" onclick="dequip()">Retirer</button>`:`<button class="btn btn-cyan bb" onclick="equip('${art.id}')">Équiper</button>`):''}`:
+    d.innerHTML=`<div class="ico-b">${art.icone}</div><div class="inf-b"><div class="nom-b">${art.nom}</div><div class="des-b">${art.desc}</div><div style="font-family:'Orbitron',monospace;font-size:.72rem;margin-top:4px;">${sym} ${art.cout} pièce${art.cout>1?'s':''} d'${art.monnaie}</div><div style="margin-top:6px;">${pos?`<span class="pos">POSSÉDÉ ✓</span>${art.id.startsWith('titre')?(isEq?`<span class="eq">ÉQUIPÉ</span><button class="btn btn-fantome bb" onclick="dequip()">Retirer</button>`:`<button class="btn btn-cyan bb" onclick="equip('${art.id}')">Équiper</button>`):''}`:
       `<button class="btn ${cls} bb" onclick="acheterArt('${art.id}')" ${peut?'':'disabled'}>${peut?'ACHETER':'Insuffisant'}</button>`}</div></div>`;
     wc.appendChild(d);
   });
-  wi.innerHTML=`<div class="ib"><div class="ico-b">💡</div><div class="inf-b"><div class="nom-b">Indices disponibles</div><div class="des-b">Tu as <strong style="color:var(--cyan);">${J.indices||0} indice(s)</strong> disponible(s).</div></div></div>`;
+  wi.innerHTML=`<div class="ib"><div class="ico-b"><span class="ic" style="color:var(--or);"><svg width="28" height="28"><use href="#ic-bulb"/></svg></span></div><div class="inf-b"><div class="nom-b">Indices disponibles</div><div class="des-b">Tu as <strong style="color:var(--cyan);">${J.indices||0} indice(s)</strong> disponible(s).</div></div></div>`;
   PACKS.forEach(pk=>{
     const p=J.pieces,sol=pk.monnaie==='or'?p.or||0:p.argent||0,peut=sol>=pk.cout;
-    const sym=pk.monnaie==='or'?'🥇':'🥈',cls=pk.monnaie==='or'?'btn-or':'btn-cyan';
+    const sym=pk.monnaie==='or'?'Or':'Ag',cls=pk.monnaie==='or'?'btn-or':'btn-cyan';
     const d=document.createElement('div'); d.className='ib';
     d.innerHTML=`<div class="ico-b">${pk.icone}</div><div class="inf-b"><div class="nom-b">${pk.nom}</div><div class="des-b">${pk.desc}</div><div style="font-family:'Orbitron',monospace;font-size:.72rem;margin-top:4px;">${sym} ${pk.cout} pièce${pk.cout>1?'s':''} d'${pk.monnaie}</div><div style="margin-top:6px;"><button class="btn ${cls} bb" onclick="acheterPack('${pk.id}')" ${peut?'':'disabled'}>${peut?'ACHETER':'Insuffisant'}</button></div></div>`;
     wi.appendChild(d);
   });
 }
-function acheterArt(id){const a=ARTS.find(x=>x.id===id);if(!a)return;const c=a.monnaie;if((J.pieces[c]||0)<a.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=a.cout;if(!J.debloques)J.debloques=[];J.debloques.push(id);if(id.startsWith('titre'))J.titreEquipe=id;sauvegarderLocal();notif(`✅ ${a.nom} débloqué !`,'s');rafPieces();rafAcc();rendreBoutique();}
-function acheterPack(id){const pk=PACKS.find(x=>x.id===id);if(!pk)return;const c=pk.monnaie;if((J.pieces[c]||0)<pk.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=pk.cout;J.indices=(J.indices||0)+pk.qte;sauvegarderLocal();notif(`💡 ${pk.qte} indices ajoutés !`,'s');rafPieces();rendreBoutique();}
+function acheterArt(id){const a=ARTS.find(x=>x.id===id);if(!a)return;const c=a.monnaie;if((J.pieces[c]||0)<a.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=a.cout;if(!J.debloques)J.debloques=[];J.debloques.push(id);if(id.startsWith('titre'))J.titreEquipe=id;sauvegarderLocal();notif(`${a.nom} débloqué !`,'s');rafPieces();rafAcc();rendreBoutique();}
+function acheterPack(id){const pk=PACKS.find(x=>x.id===id);if(!pk)return;const c=pk.monnaie;if((J.pieces[c]||0)<pk.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=pk.cout;J.indices=(J.indices||0)+pk.qte;sauvegarderLocal();notif(`${pk.qte} indices ajoutés !`,'s');rafPieces();rendreBoutique();}
 function equip(id){J.titreEquipe=id;sauvegarderLocal();rafAcc();rendreBoutique();notif('Titre équipé !','s');}
 function dequip(){J.titreEquipe=null;sauvegarderLocal();rafAcc();rendreBoutique();notif('Titre retiré','i');}
 
@@ -1585,14 +1638,14 @@ function pbD_tourSuivant() {
   // Choisir un mot aléatoire
   const toutes = Object.values(PB_MOTS).flat();
   pbD.motActuel = toutes[Math.floor(Math.random() * toutes.length)];
-  document.getElementById('pb-consigne').textContent = '🔊 Écoute bien...';
+  document.getElementById('pb-consigne').textContent = 'Écoute bien...';
   pbBulle('pb-bot-bulle', pbPhrase('intro_dictee'));
   pbAnimer('pb-bot-anim', true);
   // Parler le mot
   setTimeout(() => {
     pbParler(pbD.motActuel, () => {
       pbAnimer('pb-bot-anim', false);
-      document.getElementById('pb-consigne').textContent = '✏️ Écris le mot que tu viens d\'entendre';
+      document.getElementById('pb-consigne').textContent = 'Écris le mot que tu viens d\'entendre';
       document.getElementById('pb-rep').disabled = false;
       document.getElementById('pb-btn-val').disabled = false;
       document.getElementById('pb-btn-son').disabled = false;
@@ -1636,7 +1689,7 @@ async function pbValider() {
   document.getElementById('pb-btn-val').disabled = true;
   document.getElementById('pb-btn-son').disabled = true;
   const fb = document.getElementById('pb-feedback');
-  document.getElementById('pb-feedback-icone').textContent = correct ? '✅' : '❌';
+  document.getElementById('pb-feedback-icone').textContent = correct ? '<span class="ic" style="color:var(--vert)"><svg width="40" height="40"><use href="#ic-circlecheck"/></svg></span>' : '<span class="ic" style="color:var(--rose)"><svg width="40" height="40"><use href="#ic-circlex"/></svg></span>';
   document.getElementById('pb-feedback-txt').textContent = correct ? pbPhrase('correct') : pbPhrase('faux');
   document.getElementById('pb-feedback-mot').textContent = correct ? `+${pts} points !` : `Le mot était : "${pbD.motActuel}"`;
   document.getElementById('pb-feedback-txt').style.color = correct ? 'var(--vert)' : 'var(--rose)';
@@ -1654,7 +1707,7 @@ function pbD_timeout() {
   document.getElementById('pb-btn-val').disabled = true;
   document.getElementById('pb-btn-son').disabled = true;
   const fb = document.getElementById('pb-feedback');
-  document.getElementById('pb-feedback-icone').textContent = '⏰';
+  document.getElementById('pb-feedback-icone').innerHTML = '<span class="ic" style="color:var(--or)"><svg width="40" height="40"><use href="#ic-speed"/></svg></span>';
   document.getElementById('pb-feedback-txt').textContent = pbPhrase('timeout');
   document.getElementById('pb-feedback-txt').style.color = 'var(--rose)';
   document.getElementById('pb-feedback-mot').textContent = `Le mot était : "${pbD.motActuel}"`;
@@ -1672,16 +1725,16 @@ function pbD_finir() {
   J.soloStats.parties++;
   sauvegarderLocal();
   // Affichage résultats
-  document.getElementById('pbf-titre').textContent = '🔊 PLAYBOT DICTÉE';
-  document.getElementById('pbf-bot').textContent = pct>0.7?'🤖😊':'🤖😐';
+  document.getElementById('pbf-titre').textContent = 'PLAYBOT DICTÉE';
+  document.getElementById('pbf-bot').textContent = '<span class="ic" style="color:var(--cyan)"><svg width="64" height="64"><use href="#ic-robot"/></svg></span>';
   pbBulle('pbf-commentaire', comm);
   document.getElementById('pbf-score').textContent = pbD.score + ' pts';
   document.getElementById('pbf-record').textContent = `Record : ${J.soloStats.meilleurDictee} pts`;
   const correct = pbD.historique.filter(h=>h.correct).length;
   document.getElementById('pbf-detail').innerHTML =
-    `<div style="text-align:center;margin-bottom:10px;"><span class="orb" style="font-size:.9rem;">✅ ${correct}/${pbD.total} mots corrects</span></div>` +
+    `<div style="text-align:center;margin-bottom:10px;"><span class="orb" style="font-size:.9rem;">✓ ${correct}/${pbD.total} mots corrects</span></div>` +
     pbD.historique.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bord);">
-      <span style="font-size:.82rem;">${h.correct?'✅':'❌'} <strong>${h.mot}</strong></span>
+      <span style="font-size:.82rem;">${h.correct?'✓':'✗'} <strong>${h.mot}</strong></span>
       <span style="font-size:.75rem;color:var(--muet);">${h.rep?`"${h.rep}"`:'-'}</span>
       <span class="orb" style="font-size:.78rem;color:${h.correct?'var(--vert)':'var(--rose)'};">${h.pts?'+'+h.pts:'0'}</span>
     </div>`).join('');
@@ -1752,13 +1805,13 @@ async function pbrSoumettre() {
   const v = document.getElementById('pbr-rep').value.trim();
   if(!v) return;
   document.getElementById('pbr-rep').value='';
-  if(v[0].toUpperCase() !== pbR.lettre){ notif(`❌ Doit commencer par ${pbR.lettre} !`,'e'); return; }
-  if(pbR.mots.find(m=>m.mot.toLowerCase()===v.toLowerCase())){ notif('⚠️ Mot déjà utilisé !','e'); return; }
+  if(v[0].toUpperCase() !== pbR.lettre){ notif(`Doit commencer par ${pbR.lettre} !`,'e'); return; }
+  if(pbR.mots.find(m=>m.mot.toLowerCase()===v.toLowerCase())){ notif('Mot déjà utilisé !','e'); return; }
   // Valider le mot
   const valide = await motExisteFR(v);
   const tag = document.createElement('div');
   tag.className = 'mot-tag' + (valide?'':' invalide');
-  tag.textContent = valide ? '✅ '+v : '❌ '+v;
+  tag.textContent = valide ? '✓ '+v : '✗ '+v;
   document.getElementById('pbr-liste-mots').appendChild(tag);
   if(valide){
     pbR.mots.push({mot:v, valide:true});
@@ -1772,7 +1825,7 @@ async function pbrSoumettre() {
       if(pbR.timer) clearInterval(pbR.timer);
       const bonus = Math.round((pbR.tRestant/60)*20);
       pbR.score += bonus;
-      notif(`🎉 Objectif atteint ! +${bonus} bonus rapidité`,'s');
+      notif(`Objectif atteint ! +${bonus} bonus rapidité`,'s');
       pbParler(pbPhrase('rafale_bien'), ()=>setTimeout(()=>{
         pbR.historique.push({lettre:pbR.lettre, mots:[...pbR.mots], objectifAtteint:true});
         pbR_tourSuivant();
@@ -1804,8 +1857,8 @@ function pbR_finir() {
   if(!J.soloStats) J.soloStats={parties:0,meilleur:0,serie:0};
   if(!J.soloStats.meilleurRafale||pbR.score>J.soloStats.meilleurRafale) J.soloStats.meilleurRafale=pbR.score;
   J.soloStats.parties++; sauvegarderLocal();
-  document.getElementById('pbf-titre').textContent='🎤 PLAYBOT RAFALE';
-  document.getElementById('pbf-bot').textContent=pct>0.7?'🤖😊':'🤖😐';
+  document.getElementById('pbf-titre').textContent='PLAYBOT RAFALE';
+  document.getElementById('pbf-bot').textContent='<span class="ic" style="color:var(--cyan)"><svg width="64" height="64"><use href="#ic-robot"/></svg></span>';
   pbBulle('pbf-commentaire',comm);
   document.getElementById('pbf-score').textContent=pbR.score+' pts';
   document.getElementById('pbf-record').textContent=`Record : ${J.soloStats.meilleurRafale} pts · ${totalMots} mots trouvés`;
@@ -1813,7 +1866,7 @@ function pbR_finir() {
     const ok=h.mots.filter(m=>m.valide).map(m=>m.mot);
     const ko=h.mots.filter(m=>!m.valide).map(m=>m.mot);
     return `<div style="padding:7px 0;border-bottom:1px solid var(--bord);">
-      <div style="display:flex;justify-content:space-between;"><span class="orb" style="font-size:.72rem;">Tour ${i+1} — Lettre <strong style="color:var(--or);">${h.lettre}</strong></span><span style="font-size:.75rem;">${h.objectifAtteint?'✅ Objectif !':'❌ Raté'}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span class="orb" style="font-size:.72rem;">Tour ${i+1} — Lettre <strong style="color:var(--or);">${h.lettre}</strong></span><span style="font-size:.75rem;">${h.objectifAtteint?'✓ Objectif !':'✗ Raté'}</span></div>
       <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">${ok.map(m=>`<span class="mot-tag">${m}</span>`).join('')}${ko.map(m=>`<span class="mot-tag invalide">${m}</span>`).join('')}</div>
     </div>`;
   }).join('');
@@ -1871,8 +1924,8 @@ function selectionnerMode(mode) {
   // Modes PlayBot → écran config spécial
   if (mode === 'pb_dictee' || mode === 'pb_rafale') {
     const infos = {
-      pb_dictee: { titre:'🔊 PLAYBOT DICTÉE', desc:'PlayBot dit un mot à voix haute. Écris-le correctement !' },
-      pb_rafale: { titre:'🎤 PLAYBOT RAFALE', desc:'PlayBot donne une lettre. Écris le maximum de mots !' },
+      pb_dictee: { titre:'PLAYBOT DICTÉE', desc:'PlayBot dit un mot à voix haute. Écris-le correctement !' },
+      pb_rafale: { titre:'PLAYBOT RAFALE', desc:'PlayBot donne une lettre. Écris le maximum de mots !' },
     };
     document.getElementById('sc-titre').textContent = infos[mode].titre;
     document.getElementById('sc-desc').textContent = infos[mode].desc;
@@ -1883,12 +1936,12 @@ function selectionnerMode(mode) {
     const toursDiv = document.getElementById('sc-tours-choix');
     if (mode === 'pb_dictee') {
       toursDiv.style.display='block';
-      toursDiv.querySelector('.titre-carte').textContent='🔢 NOMBRE DE MOTS À DICTER';
+      toursDiv.querySelector('.titre-carte').textContent='NOMBRE DE MOTS À DICTER';
       const sel = toursDiv.querySelector('select');
       sel.innerHTML='<option value="5">5 mots</option><option value="10" selected>10 mots</option><option value="15">15 mots</option><option value="20">20 mots</option>';
     } else {
       toursDiv.style.display='block';
-      toursDiv.querySelector('.titre-carte').textContent='🎯 CONFIG RAFALE';
+      toursDiv.querySelector('.titre-carte').textContent='CONFIG RAFALE';
       toursDiv.querySelector('select').outerHTML='<div id="rafale-cfg"></div>';
       const cfg = document.getElementById('rafale-cfg') || toursDiv.querySelector('select');
       if(cfg) cfg.outerHTML = `<div style="display:grid;gap:8px;">
@@ -1913,12 +1966,12 @@ function selectionnerMode(mode) {
     return;
   }
   const infos = {
-    classique:     { titre:'📝 CLASSIQUE',          desc:'10 tours, toutes catégories, validation dictionnaire' },
-    chrono:        { titre:'⚡ CHRONO INFERNO',      desc:'30 secondes par tour — Va aussi vite que possible !' },
-    survie:        { titre:'❤️ SURVIE',              desc:'3 vies — Chaque mot vide ou invalide te coûte une vie' },
-    entrainement:  { titre:'🎓 ENTRAÎNEMENT',        desc:'Pas de timer — Apprends et améliore-toi sans pression' },
-    categorie:     { titre:'🎯 CATÉGORIE UNIQUE',    desc:'Maîtrise une seule catégorie à la perfection' },
-    difficile:     { titre:'💀 LETTRES DIFFICILES',  desc:'Seulement les lettres rares : W X Z Q K Y — Expert uniquement' },
+    classique:     { titre:'CLASSIQUE',          desc:'10 tours, toutes catégories, validation dictionnaire' },
+    chrono:        { titre:'CHRONO INFERNO',      desc:'30 secondes par tour — Va aussi vite que possible !' },
+    survie:        { titre:'SURVIE',              desc:'3 vies — Chaque mot vide ou invalide te coûte une vie' },
+    entrainement:  { titre:'ENTRAÎNEMENT',        desc:'Pas de timer — Apprends et améliore-toi sans pression' },
+    categorie:     { titre:'CATÉGORIE UNIQUE',    desc:'Maîtrise une seule catégorie à la perfection' },
+    difficile:     { titre:'LETTRES DIFFICILES',  desc:'Seulement les lettres rares : W X Z Q K Y — Expert uniquement' },
   };
   const inf = infos[mode];
   document.getElementById('sc-titre').textContent = inf.titre;
@@ -1926,13 +1979,13 @@ function selectionnerMode(mode) {
   document.getElementById('sc-cat-choix').style.display = mode === 'categorie' ? 'block' : 'none';
   const td = document.getElementById('sc-tours-choix');
   td.style.display = (mode === 'chrono' || mode === 'survie') ? 'none' : 'block';
-  td.querySelector('.titre-carte').textContent = '🔢 NOMBRE DE TOURS';
+  td.querySelector('.titre-carte').textContent = '<span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-hash"/></svg></span>NOMBRE DE TOURS';
   const sel = td.querySelector('select'); if(sel) sel.innerHTML='<option value="5">5 tours</option><option value="10" selected>10 tours</option><option value="15">15 tours</option><option value="20">20 tours — Marathon</option>';
   if (mode === 'categorie') {
     const l = document.getElementById('liste-cats-solo'); l.innerHTML = '';
     CATS.forEach(cat => {
       const d = document.createElement('div'); d.className = 'cat-solo-item' + (soloConfig.catId === cat.id ? ' sel' : '');
-      d.innerHTML = `<span style="font-size:1.2rem;">${cat.celeb?'⭐':'📂'}</span><span class="orb" style="font-size:.78rem;">${cat.label}</span>`;
+      d.innerHTML = `<span style="font-size:1.2rem;">${cat.celeb?'★':'▷'}</span><span class="orb" style="font-size:.78rem;">${cat.label}</span>`;
       d.onclick = () => { document.querySelectorAll('.cat-solo-item').forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); soloConfig.catId = cat.id; };
       l.appendChild(d);
     });
@@ -2000,13 +2053,13 @@ function demarrerTourSolo() {
   if (hudVies) hudVies.remove();
   if (soloEtat.mode === 'survie') {
     const hv = document.createElement('div'); hv.id = 'hud-vies-solo'; hv.className = 'hud-vies';
-    for(let i=0;i<3;i++) { const v=document.createElement('span'); v.className='vie'+(i>=soloEtat.vies?' perdu':''); v.textContent='❤️'; hv.appendChild(v); }
+    for(let i=0;i<3;i++) { const v=document.createElement('span'); v.className='vie'+(i>=soloEtat.vies?' perdu':''); v.innerHTML='<span class="ic" style="color:var(--rose)"><svg width="18" height="18"><use href="#ic-heart"/></svg></span>'; hv.appendChild(v); }
     document.querySelector('.hud').appendChild(hv);
   }
   bGrilleJeu(lettre, tn);
   document.getElementById('oa').classList.add('cache');
   document.getElementById('btn-val').disabled = false;
-  document.getElementById('jstat').textContent = soloEtat.mode === 'entrainement' ? '🎓 Mode entraînement — Pas de timer' : '';
+  document.getElementById('jstat').textContent = soloEtat.mode === 'entrainement' ? 'Mode entraînement — Pas de timer' : '';
   allerEcran('ecran-jeu');
   if (dur !== 0) lancerTimer(sec);
   else { document.getElementById('jbar').style.width='100%'; document.getElementById('jtimer').textContent='∞'; }
@@ -2025,9 +2078,9 @@ window.valider = async function(auto=false) {
     repsLocales[cat.id] = (v && v[0].toUpperCase()===lettre) ? v : '';
   });
   const bonus = Math.round((tRestant/tDuree)*BONUS_MAX);
-  document.getElementById('jstat').textContent = '🔍 Vérification des mots...';
+  document.getElementById('jstat').textContent = 'Vérification des mots...';
   document.getElementById('oa').classList.remove('cache');
-  document.getElementById('oa-txt').textContent = '🔍 Vérification des mots...';
+  document.getElementById('oa-txt').textContent = 'Vérification des mots...';
   // Valider chaque mot
   let sc = 0; const detail = {};
   const motsInvalides = [];
@@ -2046,7 +2099,7 @@ window.valider = async function(auto=false) {
     if (nbVides > cats.length / 2 || motsInvalides.length > 0) {
       soloEtat.vies--;
       perteVie = true;
-      notif(soloEtat.vies > 0 ? `💔 -1 vie ! Il te reste ${soloEtat.vies} vie(s)` : '💀 Game Over !', 'e');
+      notif(soloEtat.vies > 0 ? `-1 vie ! Il te reste ${soloEtat.vies} vie(s)` : 'Game Over !', 'e');
     }
   }
   soloEtat.scores.push(sc);
@@ -2056,7 +2109,7 @@ window.valider = async function(auto=false) {
   const finTours = soloEtat.mode !== 'chrono' && soloEtat.mode !== 'survie' && soloEtat.tourActuel >= soloConfig.tours;
   if (gameOver || finTours) { finirSolo(); return; }
   // Tour suivant — petit délai
-  document.getElementById('oa-txt').textContent = `✅ ${sc} pts ce tour ! Tour suivant...`;
+  document.getElementById('oa-txt').textContent = `${sc} pts ce tour ! Tour suivant...`;
   setTimeout(demarrerTourSolo, 1500);
 };
 
@@ -2073,16 +2126,16 @@ function finirSolo() {
   J.soloStats.serie = nouveau_record ? (J.soloStats.serie || 0) + 1 : 0;
   sauvegarderLocal();
   // Afficher résultats
-  const titres = { classique:'📝 CLASSIQUE', chrono:'⚡ CHRONO', survie:'❤️ SURVIE', entrainement:'🎓 ENTRAÎNEMENT', categorie:'🎯 CATÉGORIE', difficile:'💀 DIFFICILE' };
-  document.getElementById('sf-titre').textContent = titres[soloEtat.mode] || '🏁 RÉSULTAT';
+  const titres = { classique:'CLASSIQUE', chrono:'CHRONO', survie:'SURVIE', entrainement:'ENTRAÎNEMENT', categorie:'CATÉGORIE', difficile:'DIFFICILE' };
+  document.getElementById('sf-titre').textContent = titres[soloEtat.mode] || 'RÉSULTAT';
   document.getElementById('sf-score').textContent = total + ' pts';
   document.getElementById('sf-rang').textContent = `Moyenne : ${moy} pts/tour · ${soloEtat.scores.length} tours joués`;
-  document.getElementById('sf-record').textContent = nouveau_record ? '🏆 NOUVEAU RECORD PERSONNEL !' : `Record : ${J.soloStats.meilleur} pts`;
+  document.getElementById('sf-record').textContent = nouveau_record ? 'NOUVEAU RECORD PERSONNEL !' : `Record : ${J.soloStats.meilleur} pts`;
   // Vies restantes (survie)
   const vDiv = document.getElementById('sf-vies');
   if (soloEtat.mode === 'survie') {
     vDiv.style.display='block';
-    document.getElementById('sf-vies-aff').innerHTML = Array.from({length:3},(_,i)=>`<span class="vie${i>=soloEtat.vies?' perdu':''}">❤️</span>`).join('');
+    document.getElementById('sf-vies-aff').innerHTML = Array.from({length:3},(_,i)=>`<span class='vie${i>=soloEtat.vies?' perdu':''}'><span class='ic' style='color:var(--rose)'><svg width='20' height='20'><use href='#ic-heart'/></svg></span></span>`).join('');
   } else vDiv.style.display='none';
   // Détail tours
   const det = document.getElementById('sf-detail');
@@ -2091,7 +2144,7 @@ function finirSolo() {
     const invalides = CATS.filter(c=>h.detail[c.id]?.statut==='invalide').length;
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bord);">
       <span class="orb" style="font-size:.72rem;color:var(--muet);">Tour ${i+1} — <strong style="color:var(--or);">${h.lettre}</strong></span>
-      <span style="font-size:.75rem;">✅${valides} ${invalides?`❌${invalides}`:''}</span>
+      <span style="font-size:.75rem;">✓${valides} ${invalides?`✗${invalides}`:''}</span>
       <span class="orb" style="font-size:.82rem;color:var(--or);font-weight:700;">${h.score} pts</span>
     </div>`;
   }).join('');
