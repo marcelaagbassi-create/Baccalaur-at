@@ -206,6 +206,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+@keyframes scanLine{0%{top:10%}50%{top:85%}100%{top:10%}}
 @keyframes galaxyBorder{0%{border-image:linear-gradient(0deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}50%{border-image:linear-gradient(180deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}100%{border-image:linear-gradient(360deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}}
 /* SVG ICONS */
 .ic{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;}
@@ -360,6 +361,31 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div class="muet" style="font-size:.7rem;letter-spacing:2px;margin-bottom:10px;">OU COLLE UN LIEN D'INVITATION</div>
       <input class="champ" id="inp-lien" type="url" placeholder="https://marcelaagbassi-create.github.io/Baccalaur-at/?salon=XXXX"
         style="font-size:.8rem;" oninput="extraireCodeLien(this.value)">
+    </div>
+
+    <!-- SCANNER QR -->
+    <div class="carte mt4">
+      <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-camera"/></svg></span>SCANNER UN QR CODE</div>
+      <div id="scanner-box" style="display:none;margin-top:10px;position:relative;">
+        <video id="scanner-video" style="width:100%;max-height:260px;border-radius:12px;object-fit:cover;background:#000;" playsinline autoplay muted></video>
+        <canvas id="scanner-canvas" style="display:none;"></canvas>
+        <!-- Viseur -->
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;pointer-events:none;">
+          <div style="position:absolute;top:0;left:0;width:30px;height:30px;border-top:3px solid var(--or);border-left:3px solid var(--or);border-radius:4px 0 0 0;"></div>
+          <div style="position:absolute;top:0;right:0;width:30px;height:30px;border-top:3px solid var(--or);border-right:3px solid var(--or);border-radius:0 4px 0 0;"></div>
+          <div style="position:absolute;bottom:0;left:0;width:30px;height:30px;border-bottom:3px solid var(--or);border-left:3px solid var(--or);border-radius:0 0 0 4px;"></div>
+          <div style="position:absolute;bottom:0;right:0;width:30px;height:30px;border-bottom:3px solid var(--or);border-right:3px solid var(--or);border-radius:0 0 4px 0;"></div>
+          <!-- Ligne de scan animée -->
+          <div id="scan-line" style="position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--or),transparent);animation:scanLine 1.8s ease-in-out infinite;top:50%;"></div>
+        </div>
+        <div class="muet tc" style="font-size:.72rem;margin-top:8px;" id="scan-status">Pointe vers le QR Code...</div>
+        <button class="btn btn-rose mt2" onclick="arreterScanner()" style="padding:9px;">
+          <span class="ic" style="margin-right:7px;"><svg width="16" height="16"><use href="#ic-stop"/></svg></span>ARRÊTER
+        </button>
+      </div>
+      <button class="btn btn-or" id="btn-scanner" onclick="demarrerScanner()">
+        <span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-camera"/></svg></span>OUVRIR LA CAMÉRA
+      </button>
     </div>
   </div>
 </div>
@@ -944,6 +970,127 @@ let tDuree = 60;
 let listeners = [];
 let revCountdown = null;
 
+// ══════════════ SCANNER QR CODE ══════════════
+let scannerStream = null;
+let scannerInterval = null;
+
+async function demarrerScanner() {
+  const box = document.getElementById('scanner-box');
+  const btn = document.getElementById('btn-scanner');
+  const status = document.getElementById('scan-status');
+
+  // Vérifier support
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    notif('Caméra non supportée sur ce navigateur.', 'e'); return;
+  }
+
+  try {
+    // Demander accès caméra arrière
+    scannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+    });
+    const video = document.getElementById('scanner-video');
+    video.srcObject = scannerStream;
+    await video.play();
+
+    box.style.display = 'block';
+    btn.style.display = 'none';
+    status.textContent = 'Pointe vers le QR Code...';
+
+    // Démarrer la détection
+    scannerInterval = setInterval(() => analyserFrame(), 300);
+
+  } catch(e) {
+    console.error('Caméra:', e);
+    if (e.name === 'NotAllowedError') {
+      notif('Accès caméra refusé. Autorise la caméra dans les réglages.', 'e');
+    } else if (e.name === 'NotFoundError') {
+      notif('Aucune caméra trouvée sur cet appareil.', 'e');
+    } else {
+      notif('Impossible d\'ouvrir la camera: ' + e.message, 'e');
+    }
+  }
+}
+
+function analyserFrame() {
+  const video = document.getElementById('scanner-video');
+  const canvas = document.getElementById('scanner-canvas');
+  if (!video || video.readyState < 2) return;
+
+  const w = video.videoWidth, h = video.videoHeight;
+  if (!w || !h) return;
+
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, w, h);
+
+  try {
+    const imageData = ctx.getImageData(0, 0, w, h);
+    // Utiliser BarcodeDetector si disponible (Android Chrome, Samsung)
+    if (window.BarcodeDetector) {
+      window.BarcodeDetector.getSupportedFormats().then(() => {
+        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+        detector.detect(canvas).then(codes => {
+          if (codes.length > 0) traiterQRDetecte(codes[0].rawValue);
+        }).catch(() => {});
+      });
+    } else {
+      // Fallback : essayer avec jsQR (chargé dynamiquement)
+      chargerJsQR().then(jsQR => {
+        if (!jsQR) return;
+        const code = jsQR(imageData.data, w, h);
+        if (code) traiterQRDetecte(code.data);
+      });
+    }
+  } catch(e) {}
+}
+
+let jsQRLoaded = null;
+function chargerJsQR() {
+  if (jsQRLoaded) return Promise.resolve(jsQRLoaded);
+  return new Promise((resolve) => {
+    if (window.jsQR) { jsQRLoaded = window.jsQR; resolve(window.jsQR); return; }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+    script.onload = () => { jsQRLoaded = window.jsQR; resolve(window.jsQR); };
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+  });
+}
+
+function traiterQRDetecte(texte) {
+  console.log('QR détecté:', texte);
+  // Extraire code salon depuis URL ou texte brut
+  let code = null;
+  const matchUrl = texte.match(/[?&]salon=([A-Z0-9]{4})/i);
+  if (matchUrl) {
+    code = matchUrl[1].toUpperCase();
+  } else if (/^[A-Z0-9]{4}$/i.test(texte.trim())) {
+    code = texte.trim().toUpperCase();
+  }
+
+  if (code) {
+    arreterScanner();
+    document.getElementById('inp-code').value = code;
+    document.getElementById('scan-status').textContent = 'Code détecté : ' + code;
+    notif('QR Code lu ! Code : ' + code, 's');
+    // Rejoindre automatiquement après 800ms
+    setTimeout(() => rejoindre(), 800);
+  }
+}
+
+function arreterScanner() {
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+  if (scannerInterval) { clearInterval(scannerInterval); scannerInterval = null; }
+  const box = document.getElementById('scanner-box');
+  const btn = document.getElementById('btn-scanner');
+  if (box) box.style.display = 'none';
+  if (btn) btn.style.display = '';
+}
+
 // ══════════════ PARTAGE EN LIGNE ══════════════
 
 // URL de base de l'app
@@ -1016,7 +1163,7 @@ function genererQR() {
   const imgBox = document.getElementById('qr-img');
   imgBox.innerHTML = '';
 
-  // Essayer d'abord qr-server (fiable, CORS ok)
+  // Essayer qrserver.com (fiable, CORS ok)
   const img = document.createElement('img');
   const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(lien) + '&color=050510&bgcolor=F5F0E8&qzone=2';
   img.src = qrUrl;
@@ -1090,7 +1237,7 @@ function initApp() {
     valider,demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer,
-    copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien
+    copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner
   });
 }
 
@@ -1119,7 +1266,7 @@ function chargerLocal() {
 function allerEcran(id) { document.querySelectorAll('.ecran').forEach(e=>e.classList.remove('actif')); document.getElementById(id).classList.add('actif'); window.scrollTo(0,0); }
 function allerProfil() { document.getElementById('p-pseudo').value=J.pseudo||''; document.getElementById('p-idx').textContent=J.indices||0; majApProfil(); rafPieces(); bEmo(); bBib(); allerEcran('e-profil'); }
 function allerBoutique() { rafPieces(); rendreBoutique(); allerEcran('e-bout'); }
-function retourMenu() { nettLis(); salonData=null; estHote=false; stopTimer(); rafAcc(); allerEcran('e-acc'); }
+function retourMenu() { nettLis(); salonData=null; estHote=false; stopTimer(); arreterScanner(); rafAcc(); allerEcran('e-acc'); }
 
 // ══════════════ PROFIL ══════════════
 function bEmo() {
