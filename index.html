@@ -1013,10 +1013,21 @@ function genererQR() {
   const code = document.getElementById('aff-code').textContent;
   if (!code || code === '----') return;
   const lien = getLienSalon(code);
-  // Utiliser l'API QR code gratuite de Google Charts
-  const qrUrl = 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=' + encodeURIComponent(lien) + '&choe=UTF-8';
-  const img = document.getElementById('qr-img');
-  img.innerHTML = '<img src="' + qrUrl + '" width="180" height="180" style="display:block;border-radius:8px;" alt="QR Code">';
+  const imgBox = document.getElementById('qr-img');
+  imgBox.innerHTML = '';
+
+  // Essayer d'abord qr-server (fiable, CORS ok)
+  const img = document.createElement('img');
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(lien) + '&color=050510&bgcolor=F5F0E8&qzone=2';
+  img.src = qrUrl;
+  img.width = 180; img.height = 180;
+  img.style.cssText = 'display:block;border-radius:8px;';
+  img.alt = 'QR Code';
+  img.onerror = () => {
+    // Fallback : afficher le lien copiable
+    imgBox.innerHTML = '<div style="padding:16px;font-size:.75rem;word-break:break-all;color:var(--texte);background:var(--carte);border-radius:8px;max-width:240px;">' + lien + '</div><button class="btn btn-cyan mt2" onclick="copierLien(\'' + lien + '\')" style="padding:8px 14px;font-size:.72rem;">Copier le lien</button>';
+  };
+  imgBox.appendChild(img);
 }
 
 function extraireCodeLien(val) {
@@ -1078,7 +1089,8 @@ function initApp() {
     allerEcran,allerProfil,allerBoutique,allerCreerSalon,rejoindre,quitterSalon,lancerPartie,
     valider,demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
-    passerTour,terminer
+    passerTour,terminer,
+    copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien
   });
 }
 
