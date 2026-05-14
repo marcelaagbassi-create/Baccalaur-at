@@ -2429,46 +2429,57 @@ window.valider = async function(auto=false) {
   if (oaSpin) oaSpin.style.display = 'none';
   if (oaTitre) oaTitre.textContent = 'Vérification...';
   document.getElementById('oa-txt').textContent = 'Vérification des mots...';
-  // Valider chaque mot
+  // Valider chaque mot — avec timeout de sécurité de 8s par mot
   let sc = 0; const detail = {};
   const motsInvalides = [];
   for (const cat of cats) {
     const val = repsLocales[cat.id] || '';
     if (!val) { detail[cat.id] = { val:'', pts:0, statut:'vide' }; continue; }
-    const res = await validerMotCategorie(val, cat.id, lettre);
-    if (res.valide) { sc += cat.pts; detail[cat.id] = { val, pts:cat.pts, statut:'valide' }; }
-    else { detail[cat.id] = { val, pts:0, statut:'invalide' }; motsInvalides.push(val); }
+    try {
+      const res = await Promise.race([
+        validerMotCategorie(val, cat.id, lettre),
+        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+      ]);
+      if (res.valide) { sc += cat.pts; detail[cat.id] = { val, pts:cat.pts, statut:'valide' }; }
+      else { detail[cat.id] = { val, pts:0, statut:'invalide' }; motsInvalides.push(val); }
+    } catch(e) {
+      // En cas d'erreur ou timeout : accepter le mot (mode offline-friendly)
+      sc += cat.pts;
+      detail[cat.id] = { val, pts:cat.pts, statut:'valide' };
+    }
   }
   sc += bonus;
   // Gérer vies (survie)
-  let perteVie = false;
   if (soloEtat.mode === 'survie') {
     const nbVides = cats.filter(cat=>!repsLocales[cat.id]).length;
     if (nbVides > cats.length / 2 || motsInvalides.length > 0) {
       soloEtat.vies--;
-      perteVie = true;
       notif(soloEtat.vies > 0 ? `-1 vie ! Il te reste ${soloEtat.vies} vie(s)` : 'Game Over !', 'e');
     }
   }
   soloEtat.scores.push(sc);
   soloEtat.historique.push({ lettre, score:sc, detail, bonus, tour:soloEtat.tourActuel });
+  // TOUJOURS cacher l'overlay avant de continuer
+  document.getElementById('oa').classList.add('cache');
+  const oaSpinB = document.getElementById('oa-spin');
+  if (oaSpinB) oaSpinB.style.display = '';
   // Fin de partie ?
   const gameOver = (soloEtat.mode === 'survie' && soloEtat.vies <= 0);
   const finTours = soloEtat.mode !== 'chrono' && soloEtat.mode !== 'survie' && soloEtat.tourActuel >= soloConfig.tours;
   if (gameOver || finTours) { finirSolo(); return; }
-  // Tour suivant — petit délai
-  document.getElementById('oa-txt').textContent = `${sc} pts ce tour ! Tour suivant...`;
-  const oaTitreB = document.getElementById('oa-titre');
-  if (oaTitreB) oaTitreB.textContent = `${sc} pts ce tour !`;
-  // Remettre le spinner visible pour la prochaine utilisation multijoueur
-  const oaSpinB = document.getElementById('oa-spin');
-  if (oaSpinB) oaSpinB.style.display = '';
-  setTimeout(demarrerTourSolo, 1500);
+  // Tour suivant — afficher le score brièvement puis continuer
+  notif(`${sc} pts ce tour !`, 's');
+  setTimeout(demarrerTourSolo, 1200);
 };
 
 function finirSolo() {
   stopTimer();
   soloEtat.modeActif = false;
+  // Cacher l'overlay au cas où il serait encore visible
+  const oa = document.getElementById('oa');
+  if (oa) oa.classList.add('cache');
+  const oaSp = document.getElementById('oa-spin');
+  if (oaSp) oaSp.style.display = '';
   const total = soloEtat.scores.reduce((a,b)=>a+b, 0);
   const moy = Math.round(total / soloEtat.scores.length);
   // Mettre à jour stats
