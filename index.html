@@ -1249,10 +1249,16 @@ async function valider(auto=false) {
   document.getElementById('jstat').textContent='⏳ Envoi des réponses...';
   const l=lettreActuelle;
   CATS.forEach(cat=>{ const inp=document.getElementById('r-'+cat.id); const v=inp?inp.value.trim():''; repsLocales[cat.id]=(v&&v[0].toUpperCase()===l)?v:''; });
-  const tn=salonData?.tourActuel||parseInt((salonData?.etat||'').split('_')[1])||1;
+  // Mode solo : pas de salonData, on passe directement à la validation locale
+  if (!salonData) {
+    document.getElementById('oa').classList.remove('cache');
+    document.getElementById('jstat').textContent='';
+    return;
+  }
+  const tn=salonData.tourActuel||parseInt((salonData.etat||'').split('_')[1])||1;
   const bonus=Math.round((tRestant/tDuree)*BONUS_MAX);
   try {
-    await set(ref(db,`salons/${salonData.code}/reponsesTours/${tn}/${J.uid}`),{reponses:repsLocales,bonus,pseudo:J.pseudo,emoji:J.emoji,avatarImg:J.avatarImg||null,tempsRestant:tRestant,ts:serverTimestamp()});
+    await set(ref(db,`salons/${salonData.code}/reponsesTours/${tn}/${J.uid}`),{reponses:repsLocales,bonus,pseudo:J.pseudo,emoji:J.emoji||'',avatarImg:J.avatarImg||null,tempsRestant:tRestant,ts:serverTimestamp()});
     document.getElementById('oa').classList.remove('cache');
     document.getElementById('jstat').textContent='';
   } catch(e){notif('Erreur envoi: '+e.message,'e');document.getElementById('btn-val').disabled=false;document.getElementById('jstat').textContent='';console.error(e);}
@@ -1689,7 +1695,7 @@ async function pbValider() {
   document.getElementById('pb-btn-val').disabled = true;
   document.getElementById('pb-btn-son').disabled = true;
   const fb = document.getElementById('pb-feedback');
-  document.getElementById('pb-feedback-icone').textContent = correct ? '<span class="ic" style="color:var(--vert)"><svg width="40" height="40"><use href="#ic-circlecheck"/></svg></span>' : '<span class="ic" style="color:var(--rose)"><svg width="40" height="40"><use href="#ic-circlex"/></svg></span>';
+  document.getElementById('pb-feedback-icone').innerHTML = correct ? '<span class="ic" style="color:var(--vert)"><svg width="40" height="40"><use href="#ic-circlecheck"/></svg></span>' : '<span class="ic" style="color:var(--rose)"><svg width="40" height="40"><use href="#ic-circlex"/></svg></span>';
   document.getElementById('pb-feedback-txt').textContent = correct ? pbPhrase('correct') : pbPhrase('faux');
   document.getElementById('pb-feedback-mot').textContent = correct ? `+${pts} points !` : `Le mot était : "${pbD.motActuel}"`;
   document.getElementById('pb-feedback-txt').style.color = correct ? 'var(--vert)' : 'var(--rose)';
@@ -1936,12 +1942,12 @@ function selectionnerMode(mode) {
     const toursDiv = document.getElementById('sc-tours-choix');
     if (mode === 'pb_dictee') {
       toursDiv.style.display='block';
-      toursDiv.querySelector('.titre-carte').textContent='NOMBRE DE MOTS À DICTER';
+      toursDiv.querySelector('.titre-carte').innerHTML='<span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-hash"/></svg></span>NOMBRE DE MOTS À DICTER';
       const sel = toursDiv.querySelector('select');
       sel.innerHTML='<option value="5">5 mots</option><option value="10" selected>10 mots</option><option value="15">15 mots</option><option value="20">20 mots</option>';
     } else {
       toursDiv.style.display='block';
-      toursDiv.querySelector('.titre-carte').textContent='CONFIG RAFALE';
+      toursDiv.querySelector('.titre-carte').innerHTML='<span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-target"/></svg></span>CONFIG RAFALE';
       toursDiv.querySelector('select').outerHTML='<div id="rafale-cfg"></div>';
       const cfg = document.getElementById('rafale-cfg') || toursDiv.querySelector('select');
       if(cfg) cfg.outerHTML = `<div style="display:grid;gap:8px;">
@@ -1979,7 +1985,7 @@ function selectionnerMode(mode) {
   document.getElementById('sc-cat-choix').style.display = mode === 'categorie' ? 'block' : 'none';
   const td = document.getElementById('sc-tours-choix');
   td.style.display = (mode === 'chrono' || mode === 'survie') ? 'none' : 'block';
-  td.querySelector('.titre-carte').textContent = '<span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-hash"/></svg></span>NOMBRE DE TOURS';
+  td.querySelector('.titre-carte').innerHTML = '<span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-hash"/></svg></span>NOMBRE DE TOURS';
   const sel = td.querySelector('select'); if(sel) sel.innerHTML='<option value="5">5 tours</option><option value="10" selected>10 tours</option><option value="15">15 tours</option><option value="20">20 tours — Marathon</option>';
   if (mode === 'categorie') {
     const l = document.getElementById('liste-cats-solo'); l.innerHTML = '';
