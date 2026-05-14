@@ -206,6 +206,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+@keyframes galaxyBorder{0%{border-image:linear-gradient(0deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}50%{border-image:linear-gradient(180deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}100%{border-image:linear-gradient(360deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}}
 /* SVG ICONS */
 .ic{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;}
 .ic svg{display:block;}
@@ -419,8 +420,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
   </div>
   <div class="tc muet" style="font-size:.67rem;padding:3px 0;" id="jstat"></div>
   <div class="oa cache" id="oa">
-    <div class="spin"></div>
-    <div class="or orb" style="font-size:1.1rem;">Réponses envoyées !</div>
+    <div class="spin" id="oa-spin"></div>
+    <div class="or orb" id="oa-titre" style="font-size:1.1rem;">Réponses envoyées !</div>
     <div class="muet" id="oa-txt">En attente des autres joueurs...</div>
   </div>
 </div>
@@ -883,16 +884,31 @@ const IDX = {
   celeb:{A:'Adele',B:'Beyoncé',C:'Cristiano',D:'Drake',E:'Elon Musk',F:'Federer',G:'Gigi Hadid',H:'Harry Styles',I:'Idris Elba',J:'Jay-Z',L:'LeBron',M:'Mbappé',N:'Neymar',O:'Obama',P:'Post Malone',R:'Rihanna',S:'Shakira',T:'Taylor Swift',V:'Valentino',W:'Will Smith',X:'Xavier Dolan',Y:'Yannick Noah',Z:'Zidane',Q:'Quavo'},
 };
 const ARTS = [
-  {id:'cadre_or',   nom:'Cadre Doré',         desc:'Bordure dorée sur ton avatar',  cout:5,monnaie:'or',    icone:'ART'},
-  {id:'cadre_neon', nom:'Cadre Néon',          desc:'Bordure néon sur ton avatar',   cout:3,monnaie:'argent',icone:'NÉO'},
-  {id:'titre_leg',  nom:'Titre : LÉGENDE',     desc:'Affiché sous ton pseudo',       cout:8,monnaie:'or',    icone:'LEG'},
-  {id:'titre_as',   nom:'Titre : AS DES MOTS', desc:'Affiché sous ton pseudo',       cout:5,monnaie:'argent',icone:'AS'},
-  {id:'titre_genie',nom:'Titre : GÉNIE',       desc:'Affiché sous ton pseudo',       cout:3,monnaie:'bronze',icone:'GEN'},
+  // ── Cadres avatar ──
+  {id:'cadre_or',      nom:'Cadre Doré',           desc:'Bordure dorée brillante sur ton avatar',         cout:5,  monnaie:'or',    icone:'ART'},
+  {id:'cadre_neon',    nom:'Cadre Néon',            desc:'Bordure néon cyan électrique sur ton avatar',    cout:3,  monnaie:'argent',icone:'NÉO'},
+  {id:'cadre_rose',    nom:'Cadre Rose Vif',        desc:'Bordure rose flamboyante sur ton avatar',        cout:2,  monnaie:'argent',icone:'ART'},
+  {id:'cadre_vert',    nom:'Cadre Émeraude',        desc:'Bordure vert émeraude sur ton avatar',           cout:2,  monnaie:'argent',icone:'ART'},
+  {id:'cadre_platine', nom:'Cadre Platine',         desc:'Bordure platine ultra-rare, pour les élites',    cout:12, monnaie:'or',    icone:'ART'},
+  {id:'cadre_galaxy',  nom:'Cadre Galaxie',         desc:'Bordure dégradé galaxie animée',                 cout:8,  monnaie:'or',    icone:'NÉO'},
+  // ── Titres ──
+  {id:'titre_leg',     nom:'Titre : LÉGENDE',       desc:'Affiché fièrement sous ton pseudo',              cout:8,  monnaie:'or',    icone:'LEG'},
+  {id:'titre_as',      nom:'Titre : AS DES MOTS',   desc:'Affiché sous ton pseudo',                        cout:5,  monnaie:'argent',icone:'AS'},
+  {id:'titre_genie',   nom:'Titre : GÉNIE',         desc:'Affiché sous ton pseudo',                        cout:3,  monnaie:'bronze',icone:'GEN'},
+  {id:'titre_expert',  nom:'Titre : EXPERT',        desc:'Pour les joueurs aguerris',                      cout:4,  monnaie:'argent',icone:'GEN'},
+  {id:'titre_maitre',  nom:'Titre : MAÎTRE',        desc:'Réservé aux meilleurs joueurs',                  cout:6,  monnaie:'or',    icone:'LEG'},
+  {id:'titre_champion',nom:'Titre : CHAMPION',      desc:'Le titre des vrais champions',                   cout:10, monnaie:'or',    icone:'LEG'},
+  {id:'titre_rookie',  nom:'Titre : ROOKIE',        desc:'Pour débuter avec style',                        cout:1,  monnaie:'bronze',icone:'GEN'},
+  {id:'titre_futur',   nom:'Titre : FUTURISTE',     desc:'Un titre venu du futur',                         cout:7,  monnaie:'or',    icone:'NÉO'},
 ];
 const PACKS = [
-  {id:'pk5', nom:'Pack 5 Indices', desc:'5 indices pour tes prochaines parties', cout:2,monnaie:'or',    icone:'IDX', qte:5 },
-  {id:'pk10',nom:'Pack 10 Indices',desc:'10 indices pour tes prochaines parties',cout:4,monnaie:'or',    icone:'IDX',qte:10},
-  {id:'pk3a',nom:'Pack 3 Indices', desc:'3 indices pour tes prochaines parties', cout:3,monnaie:'argent',icone:'IDX', qte:3 },
+  {id:'pk1',  nom:'Pack 1 Indice',   desc:'1 indice pour ta prochaine partie',     cout:1,  monnaie:'bronze',icone:'IDX', qte:1  },
+  {id:'pk3b', nom:'Pack 3 Indices',  desc:'3 indices, ideal pour commencer',       cout:1,  monnaie:'argent',icone:'IDX', qte:3  },
+  {id:'pk5',  nom:'Pack 5 Indices',  desc:'5 indices pour tes prochaines parties', cout:2,  monnaie:'or',    icone:'IDX', qte:5  },
+  {id:'pk10', nom:'Pack 10 Indices', desc:'10 indices, le pack intermediaire',     cout:4,  monnaie:'or',    icone:'IDX', qte:10 },
+  {id:'pk20', nom:'Pack 20 Indices', desc:'20 indices, le pack du champion',       cout:7,  monnaie:'or',    icone:'IDX', qte:20 },
+  {id:'pk50', nom:'Mega Pack 50',    desc:'50 indices, stock illimite !',          cout:15, monnaie:'or',    icone:'IDX', qte:50 },
+  {id:'pk3a', nom:'Pack Argent x3',  desc:'3 indices en echange d argent',         cout:3,  monnaie:'argent',icone:'IDX', qte:3  },
 ];
 
 // ══════════════ ÉTAT ══════════════
@@ -981,16 +997,37 @@ function majApProfil() {
   setAv(el,J);
   const t=document.getElementById('p-titre'); if(t) t.textContent=getTitre();
 }
+function getCadreStyle(joueur) {
+  const deb = joueur.debloques || [];
+  if (deb.includes('cadre_galaxy'))  return '3px solid; border-image: linear-gradient(135deg,#4ECDC4,#8B3A0F,#C8960C,#4ECDC4) 1';
+  if (deb.includes('cadre_platine')) return '3px solid #e5e4e2; box-shadow:0 0 12px #e5e4e2';
+  if (deb.includes('cadre_or'))      return '3px solid #C8960C; box-shadow:0 0 10px rgba(200,150,12,.5)';
+  if (deb.includes('cadre_neon'))    return '3px solid #4ECDC4; box-shadow:0 0 10px rgba(78,205,196,.6)';
+  if (deb.includes('cadre_rose'))    return '3px solid #8B3A0F; box-shadow:0 0 8px rgba(139,58,15,.5)';
+  if (deb.includes('cadre_vert'))    return '3px solid #5B8A3C; box-shadow:0 0 8px rgba(91,138,60,.5)';
+  return '';
+}
 function setAv(el,joueur) {
   el.innerHTML='';
+  const cadre = getCadreStyle(joueur);
+  if (cadre) el.style.cssText += ';' + cadre;
   if(joueur.avatarImg){ const img=document.createElement('img'); img.src=joueur.avatarImg; el.appendChild(img); }
   else { const sp=document.createElement('span'); sp.textContent=''; el.appendChild(sp); }
   const ov=document.createElement('div'); ov.className='av-ov'; ov.innerHTML='<span class="ic" style="color:#fff;"><svg width="18" height="18"><use href="#ic-pencil"/></svg></span>'; el.appendChild(ov);
 }
 function getTitre() {
-  if((J.debloques||[]).includes('titre_leg')) return 'LÉGENDE';
-  if((J.debloques||[]).includes('titre_as')) return 'AS DES MOTS';
-  if((J.debloques||[]).includes('titre_genie')) return 'GÉNIE';
+  // Utilise le titre équipé si disponible
+  const equipe = J.titreEquipe;
+  const map = {
+    titre_leg:'LÉGENDE', titre_as:'AS DES MOTS', titre_genie:'GÉNIE',
+    titre_expert:'EXPERT', titre_maitre:'MAÎTRE', titre_champion:'CHAMPION',
+    titre_rookie:'ROOKIE', titre_futur:'FUTURISTE'
+  };
+  if (equipe && map[equipe]) return map[equipe];
+  // Sinon premier titre débloqué
+  for (const [k,v] of Object.entries(map)) {
+    if ((J.debloques||[]).includes(k)) return v;
+  }
   return '';
 }
 function sauvegarderProfil() {
@@ -1521,7 +1558,7 @@ function rendreBoutique() {
     wi.appendChild(d);
   });
 }
-function acheterArt(id){const a=ARTS.find(x=>x.id===id);if(!a)return;const c=a.monnaie;if((J.pieces[c]||0)<a.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=a.cout;if(!J.debloques)J.debloques=[];J.debloques.push(id);if(id.startsWith('titre'))J.titreEquipe=id;sauvegarderLocal();notif(`${a.nom} débloqué !`,'s');rafPieces();rafAcc();rendreBoutique();}
+function acheterArt(id){const a=ARTS.find(x=>x.id===id);if(!a)return;const c=a.monnaie;if((J.pieces[c]||0)<a.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=a.cout;if(!J.debloques)J.debloques=[];J.debloques.push(id);if(id.startsWith('titre'))J.titreEquipe=id;sauvegarderLocal();notif(`${a.nom} débloqué !`,'s');rafPieces();rafAcc();majApProfil();rendreBoutique();}
 function acheterPack(id){const pk=PACKS.find(x=>x.id===id);if(!pk)return;const c=pk.monnaie;if((J.pieces[c]||0)<pk.cout){notif('Pièces insuffisantes !','e');return;}J.pieces[c]-=pk.cout;J.indices=(J.indices||0)+pk.qte;sauvegarderLocal();notif(`${pk.qte} indices ajoutés !`,'s');rafPieces();rendreBoutique();}
 function equip(id){J.titreEquipe=id;sauvegarderLocal();rafAcc();rendreBoutique();notif('Titre équipé !','s');}
 function dequip(){J.titreEquipe=null;sauvegarderLocal();rafAcc();rendreBoutique();notif('Titre retiré','i');}
@@ -2085,7 +2122,13 @@ window.valider = async function(auto=false) {
   });
   const bonus = Math.round((tRestant/tDuree)*BONUS_MAX);
   document.getElementById('jstat').textContent = 'Vérification des mots...';
-  document.getElementById('oa').classList.remove('cache');
+  // Overlay solo : sans spinner "attente autres joueurs"
+  const oaEl = document.getElementById('oa');
+  oaEl.classList.remove('cache');
+  const oaSpin = document.getElementById('oa-spin');
+  const oaTitre = document.getElementById('oa-titre');
+  if (oaSpin) oaSpin.style.display = 'none';
+  if (oaTitre) oaTitre.textContent = 'Vérification...';
   document.getElementById('oa-txt').textContent = 'Vérification des mots...';
   // Valider chaque mot
   let sc = 0; const detail = {};
@@ -2116,6 +2159,11 @@ window.valider = async function(auto=false) {
   if (gameOver || finTours) { finirSolo(); return; }
   // Tour suivant — petit délai
   document.getElementById('oa-txt').textContent = `${sc} pts ce tour ! Tour suivant...`;
+  const oaTitreB = document.getElementById('oa-titre');
+  if (oaTitreB) oaTitreB.textContent = `${sc} pts ce tour !`;
+  // Remettre le spinner visible pour la prochaine utilisation multijoueur
+  const oaSpinB = document.getElementById('oa-spin');
+  if (oaSpinB) oaSpinB.style.display = '';
   setTimeout(demarrerTourSolo, 1500);
 };
 
