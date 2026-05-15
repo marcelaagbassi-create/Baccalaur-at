@@ -51,7 +51,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 .oe:hover{border-color:var(--cyan);transform:scale(1.05);}
 .oe.sel{border-color:var(--or);box-shadow:0 0 15px rgba(255,215,0,.3);}
 .gp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0;max-height:320px;overflow-y:auto;}
-.ip{aspect-ratio:1;border-radius:12px;cursor:pointer;border:2px solid var(--bord);overflow:hidden;transition:all .2s;position:relative;background:var(--carte);}.ip img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;}
+.ip{width:100%;aspect-ratio:1;border-radius:12px;cursor:pointer;border:2px solid var(--bord);overflow:hidden;transition:all .2s;background:var(--carte);display:block;}.ip img{width:100%;height:100%;object-fit:cover;display:block;}
 .ip img{width:100%;height:100%;object-fit:cover;display:block;}
 .ip:hover{border-color:var(--cyan);transform:scale(1.03);}
 .ip.sel{border-color:var(--or);box-shadow:0 0 12px rgba(255,215,0,.3);}
@@ -2176,7 +2176,7 @@ function pbD_finir() {
   sauvegarderLocal();
   // Affichage résultats
   document.getElementById('pbf-titre').textContent = 'PLAYBOT DICTÉE';
-  document.getElementById('pbf-bot').textContent = '<span class="ic" style="color:var(--cyan)"><svg width="64" height="64"><use href="#ic-robot"/></svg></span>';
+  document.getElementById('pbf-bot').innerHTML = '<span class="ic" style="color:var(--cyan)"><svg width="64" height="64"><use href="#ic-robot"/></svg></span>';
   pbBulle('pbf-commentaire', comm);
   document.getElementById('pbf-score').textContent = pbD.score + ' pts';
   document.getElementById('pbf-record').textContent = `Record : ${J.soloStats.meilleurDictee} pts`;
@@ -2308,7 +2308,7 @@ function pbR_finir() {
   if(!J.soloStats.meilleurRafale||pbR.score>J.soloStats.meilleurRafale) J.soloStats.meilleurRafale=pbR.score;
   J.soloStats.parties++; sauvegarderLocal();
   document.getElementById('pbf-titre').textContent='PLAYBOT RAFALE';
-  document.getElementById('pbf-bot').textContent='<span class="ic" style="color:var(--cyan)"><svg width="64" height="64"><use href="#ic-robot"/></svg></span>';
+  document.getElementById('pbf-bot').innerHTML='<span class="ic" style="color:var(--cyan)"><svg width="64" height="64"><use href="#ic-robot"/></svg></span>';
   pbBulle('pbf-commentaire',comm);
   document.getElementById('pbf-score').textContent=pbR.score+' pts';
   document.getElementById('pbf-record').textContent=`Record : ${J.soloStats.meilleurRafale} pts · ${totalMots} mots trouvés`;
@@ -2618,16 +2618,57 @@ function finirSolo() {
     vDiv.style.display='block';
     document.getElementById('sf-vies-aff').innerHTML = Array.from({length:3},(_,i)=>`<span class='vie${i>=soloEtat.vies?' perdu':''}'><span class='ic' style='color:var(--rose)'><svg width='20' height='20'><use href='#ic-heart'/></svg></span></span>`).join('');
   } else vDiv.style.display='none';
-  // Détail tours
+  // Détail tours avec erreurs dépliables
+  const cats = soloEtat.mode === 'categorie'
+    ? CATS.filter(c=>c.id===soloConfig.catId)
+    : CATS;
   const det = document.getElementById('sf-detail');
   det.innerHTML = soloEtat.historique.map((h,i)=>{
-    const valides = CATS.filter(c=>h.detail[c.id]?.statut==='valide').length;
-    const invalides = CATS.filter(c=>h.detail[c.id]?.statut==='invalide').length;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bord);">
-      <span class="orb" style="font-size:.72rem;color:var(--muet);">Tour ${i+1} — <strong style="color:var(--or);">${h.lettre}</strong></span>
-      <span style="font-size:.75rem;">✓${valides} ${invalides?`✗${invalides}`:''}</span>
-      <span class="orb" style="font-size:.82rem;color:var(--or);font-weight:700;">${h.score} pts</span>
-    </div>`;
+    const valides = cats.filter(c=>h.detail[c.id]?.statut==='valide').length;
+    const invalides = cats.filter(c=>h.detail[c.id]?.statut==='invalide').length;
+    const vides   = cats.filter(c=>h.detail[c.id]?.statut==='vide' || !h.detail[c.id]).length;
+
+    // Ligne erreurs dépliable
+    const lignesErreurs = cats.map(c=>{
+      const d = h.detail[c.id];
+      if (!d || d.statut === 'valide' || d.statut === 'vide') return '';
+      return `<div style="display:flex;justify-content:space-between;padding:3px 8px;background:rgba(139,58,15,.08);border-radius:6px;margin:2px 0;">
+        <span style="font-size:.7rem;color:var(--muet);">${c.label}</span>
+        <span style="font-size:.7rem;color:var(--rose);">✗ ${d.val||'—'}</span>
+      </div>`;
+    }).join('');
+
+    const lignesVides = cats.map(c=>{
+      const d = h.detail[c.id];
+      if (!d || d.statut !== 'vide') return '';
+      return `<div style="display:flex;justify-content:space-between;padding:3px 8px;background:rgba(0,0,0,.03);border-radius:6px;margin:2px 0;">
+        <span style="font-size:.7rem;color:var(--muet);">${c.label}</span>
+        <span style="font-size:.7rem;color:var(--muet);">non rempli</span>
+      </div>`;
+    }).join('');
+
+    const hasProblems = invalides > 0 || vides > 0;
+    const uid = 'tour-det-' + i;
+    const clickAttr = hasProblems
+      ? 'onclick="var p=document.getElementById(\'' + uid + '\');p.style.display=p.style.display===\'none\'?\'block\':\'none\'"'
+      : '';
+    const detailPanel = hasProblems
+      ? '<div id="' + uid + '" style="display:none;padding:4px 0 8px;">' + lignesErreurs + lignesVides + '</div>'
+      : '';
+    const scoreSpans =
+      (valides > 0 ? '<span style="color:var(--vert);">✓' + valides + '</span>' : '') +
+      (invalides > 0 ? '<span style="color:var(--rose);">✗' + invalides + '</span>' : '') +
+      (vides > 0 ? '<span style="color:var(--muet);">○' + vides + '</span>' : '') +
+      (hasProblems ? '<span style="color:var(--muet);font-size:.65rem;">▾</span>' : '');
+
+    return '<div style="border-bottom:1px solid var(--bord);">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;cursor:' + (hasProblems ? 'pointer' : 'default') + ';" ' + clickAttr + '>'
+      + '<span class="orb" style="font-size:.72rem;color:var(--muet);">Tour ' + (i+1) + ' — <strong style="color:var(--or);">' + h.lettre + '</strong></span>'
+      + '<span style="font-size:.75rem;display:flex;gap:6px;align-items:center;">' + scoreSpans + '</span>'
+      + '<span class="orb" style="font-size:.82rem;color:var(--or);font-weight:700;">' + h.score + ' pts</span>'
+      + '</div>'
+      + detailPanel
+      + '</div>';
   }).join('');
   if (nouveau_record) confettis();
   allerEcran('e-solo-fin');
