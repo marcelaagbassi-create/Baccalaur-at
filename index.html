@@ -206,6 +206,49 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+
+/* ═══ LOADER DAVIESLAY ═══ */
+#davieslay-loader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;transition:opacity .6s ease, visibility .6s ease;
+}
+#davieslay-loader.fade-out{opacity:0;visibility:hidden;}
+.dl-logo{
+  font-family:'Orbitron',monospace;font-size:clamp(2rem,8vw,3.2rem);
+  font-weight:900;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--or),var(--cyan),var(--rose),var(--or));
+  background-size:300% 300%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:gradientShift 2s ease infinite;
+  text-align:center;line-height:1.1;
+}
+.dl-sub{
+  font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:6px;
+  color:var(--muet);margin-top:6px;text-align:center;
+}
+.dl-brand{
+  margin-top:50px;font-family:'Orbitron',monospace;font-size:.55rem;
+  letter-spacing:3px;color:var(--muet);opacity:.6;text-align:center;
+}
+.dl-brand strong{color:var(--or);font-size:.7rem;letter-spacing:4px;}
+.dl-bar-wrap{
+  width:180px;height:3px;background:rgba(255,255,255,.08);
+  border-radius:3px;margin-top:40px;overflow:hidden;
+}
+.dl-bar{
+  height:100%;width:0;border-radius:3px;
+  background:linear-gradient(90deg,var(--cyan),var(--or));
+  animation:dlBar 1.8s ease forwards;
+}
+.dl-cap{
+  font-size:3.5rem;margin-bottom:-10px;
+  animation:dlCapPop .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes dlBar{0%{width:0}100%{width:100%}}
+@keyframes dlCapPop{0%{transform:scale(0) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes scanLine{0%{top:10%}50%{top:85%}100%{top:10%}}
 @keyframes galaxyBorder{0%{border-image:linear-gradient(0deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}50%{border-image:linear-gradient(180deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}100%{border-image:linear-gradient(360deg,#4ECDC4,#C8960C,#8B3A0F,#5B8A3C) 1}}
 /* SVG ICONS */
@@ -266,6 +309,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <symbol id="ic-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="7" y="7" width="1" height="1" fill="currentColor"/><rect x="16" y="7" width="1" height="1" fill="currentColor"/><rect x="7" y="16" width="1" height="1" fill="currentColor"/><line x1="14" y1="14" x2="17" y2="17"/><line x1="17" y1="14" x2="17" y2="20"/><line x1="14" y1="17" x2="17" y2="17"/><line x1="14" y1="20" x2="20" y2="20"/><line x1="20" y1="14" x2="20" y2="17"/></symbol>
 <symbol id="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
 </svg>
+<!-- ═══ LOADER DAVIESLAY ═══ -->
+<div id="davieslay-loader">
+  <div class="dl-cap"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+  <div class="dl-logo">BACCALAURÉAT</div>
+  <div class="dl-sub">LE JEU DES MOTS EN COMPÉTITION</div>
+  <div class="dl-bar-wrap"><div class="dl-bar"></div></div>
+  <div class="dl-brand">CRÉÉ PAR<br><strong>DAVIESLAY 💥</strong></div>
+</div>
+
 <div class="app">
 
 <!-- ACCUEIL -->
@@ -1225,6 +1277,14 @@ function initApp() {
   bEmo(); bBib();
   rafAcc();
   verifierLienInvitation();
+  // Masquer le loader après init
+  setTimeout(() => {
+    const loader = document.getElementById('davieslay-loader');
+    if (loader) {
+      loader.classList.add('fade-out');
+      setTimeout(() => loader.remove(), 700);
+    }
+  }, 1800);
   // Connexion Firebase status
   onValue(ref(db,'.info/connected'), s => {
     const el = document.getElementById('fb-status');
@@ -2421,14 +2481,8 @@ window.valider = async function(auto=false) {
   });
   const bonus = Math.round((tRestant/tDuree)*BONUS_MAX);
   document.getElementById('jstat').textContent = 'Vérification des mots...';
-  // Overlay solo : sans spinner "attente autres joueurs"
-  const oaEl = document.getElementById('oa');
-  oaEl.classList.remove('cache');
-  const oaSpin = document.getElementById('oa-spin');
-  const oaTitre = document.getElementById('oa-titre');
-  if (oaSpin) oaSpin.style.display = 'none';
-  if (oaTitre) oaTitre.textContent = 'Vérification...';
-  document.getElementById('oa-txt').textContent = 'Vérification des mots...';
+  // En mode solo : on n'affiche JAMAIS l'overlay multijoueur
+  // On désactive le bouton et on attend juste la vérif
   // Valider chaque mot — avec timeout de sécurité de 8s par mot
   let sc = 0; const detail = {};
   const motsInvalides = [];
