@@ -317,6 +317,19 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
   <div class="dl-bar-wrap"><div class="dl-bar"></div></div>
   <div class="dl-brand">CRÉÉ PAR<br><strong>DAVIESLAY 💥</strong></div>
 </div>
+<script>
+// Masquer le loader après 2.5s MAX — indépendant de Firebase
+(function(){
+  var MAX = 2500;
+  setTimeout(function(){
+    var l = document.getElementById('davieslay-loader');
+    if(l && !l.classList.contains('fade-out')){
+      l.classList.add('fade-out');
+      setTimeout(function(){ if(l.parentNode) l.parentNode.removeChild(l); }, 700);
+    }
+  }, MAX);
+})();
+</script>
 
 <div class="app">
 
@@ -1292,9 +1305,11 @@ function initApp() {
     else el.innerHTML = '<span style="color:var(--rose);">● Hors ligne — Vérifiez votre connexion</span>';
   });
   // Exposer fonctions globales
+  // NE PAS exposer valider ici — le mode solo le redéfinit plus bas via window.valider
+  window.valider = valider; // valeur par défaut (multijoueur)
   Object.assign(window, {
     allerEcran,allerProfil,allerBoutique,allerCreerSalon,rejoindre,quitterSalon,lancerPartie,
-    valider,demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
+    demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer,
     copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner
@@ -1665,43 +1680,77 @@ async function valider(auto=false) {
 // Cache pour éviter de re-valider le même mot
 const cacheValidation = {};
 
-// Validation via API dictionnaire français (dictionnaire.lerobert.com / api.dictionaryapi.dev)
-async function motExisteFR(mot) {
+// ═══ VALIDATION INTELLIGENTE ═══
+// Base locale de prénoms, villes, pays, marques connues (extension rapide)
+const BASE_PRENOMS = new Set('Aaron,Abel,Abraham,Adam,Adèle,Adeline,Adrien,Ahmed,Aisha,Alain,Albert,Alec,Alex,Alexa,Alexandre,Alexia,Alexis,Alice,Alicia,Alima,Alison,Alix,Allah,Alois,Alphonse,Alvin,Amadou,Amandine,Amara,Amber,Ambre,Amédée,Amelia,Amelie,Ami,Amine,Amir,Anaelle,Anais,André,Andréa,Andrei,Andy,Angel,Angele,Angeline,Angélique,Anicet,Antoine,Antonin,Antoyne,Ariel,Arielle,Armel,Arnaud,Arthur,Astrid,Aubin,Aude,Audrey,Auguste,Aurelie,Aurélien,Axel,Axelle,Ayoub,Aziz,Baptiste,Barnabé,Basile,Bastien,Beatrice,Béatrix,Benjamin,Benoit,Bernard,Bertrand,Boris,Brandon,Bruno,Camille,Carl,Carlos,Carole,Caroline,Céline,Charles,Charlotte,Chloé,Christian,Christine,Christophe,Clara,Claude,Clement,Clément,Clémence,Clotilde,Colin,Corinne,Cyrille,Cyril,Damien,Daniel,Danielle,David,Déborah,Delphine,Denis,Diane,Didier,Dominique,Dylan,Edith,Edmond,Edouard,Elena,Elisabeth,Elise,Emile,Emilie,Emmanuel,Eric,Ethan,Etienne,Eva,Evan,Eve,Evelyne,Fabian,Fabien,Fabrice,Fatima,Fatou,Felix,Fernand,Fiona,Florence,Florian,Francois,François,Francoise,Françoise,Frédéric,Gabriel,Gabin,Gaëlle,Gaetan,Gaétan,Georges,Gerard,Gilles,Guillaume,Guy,Gwenaelle,Hamid,Hana,Hanna,Hannah,Helene,Henri,Hervé,Hugo,Ibrahim,Inès,Iris,Isabelle,Ivan,Jade,Jacques,Jasmine,Jean,Jeanne,Jerome,Jérôme,Jessica,Jonas,Jonathan,Jordan,Joseph,Josephine,Joséphine,Julien,Julie,Julien,Karim,Karl,Kevin,Kilian,Lara,Laure,Laurent,Laurie,Layla,Lena,Léa,Léon,Léonie,Lila,Lilian,Lilou,Lina,Lisa,Louis,Louise,Luca,Lucas,Lucie,Ludovic,Lukas,Luna,Léo,Léonie,Maël,Maëlle,Magali,Malika,Malo,Manon,Marc,Marcel,Marie,Marion,Martin,Mathieu,Mathis,Mathilde,Matthieu,Maxime,Maya,Melodie,Michael,Michel,Mohamed,Mohammed,Morgan,Nathan,Nicolas,Nina,Noah,Noemie,Noémie,Noel,Nora,Océane,Olivia,Omar,Pauline,Pedro,Philippe,Pierre,Romain,Rosa,Roxane,Samuel,Sarah,Sebastien,Sébastien,Simon,Sofia,Sophie,Stephane,Stéphane,Sylvain,Sylvie,Thomas,Tiago,Tom,Tony,Tristan,Valentin,Valentine,Valerie,Victor,Victoria,Vincent,Virginie,Xavier,Yanis,Yasmine,Yoann,Yves,Zacharie,Zoe,Zoé'.split(',').map(s=>s.toLowerCase()));
+
+const BASE_VILLES = new Set('abidjan,accra,alger,amiens,amsterdam,ankara,annecy,angers,athens,avignon,bamako,barcelone,beijing,beyrouth,bordeaux,brazzaville,brest,bruxelles,buenos aires,bujumbura,caen,cairo,casablanca,cayenne,chicago,clermont,cologne,conakry,copenhagen,dakar,dallas,dijon,douala,dubai,dublin,grenoble,guadalajara,guangzhou,hamburg,hanoi,jakarta,kinshasa,lagos,lausanne,le havre,le mans,libreville,lille,lima,lisbonne,lomé,london,los angeles,lyon,madrid,manille,marseille,montreal,moscou,mulhouse,mumbai,nairobi,nancy,nantes,nice,niamey,nouakchott,ouagadougou,paris,prague,reims,rennes,rio,rome,rouen,saint-etienne,santiago,seoul,shanghai,strasbourg,sydney,tokyo,toronto,toulon,toulouse,tunis,varsovie,venise,vienne,warsaw,washington,yaoundé,yokohama,zurich'.split(','));
+
+const BASE_PAYS = new Set('afghanistan,albanie,algerie,allemagne,angola,arabie,argentine,armenie,australie,autriche,azerbaidjan,bahamas,bangladesh,belgique,bolivie,bosnie,botswana,bresil,bulgarie,cameroun,canada,chili,chine,chypre,colombie,comores,congo,coree,cote,croatie,cuba,danemark,djibouti,egypte,emirats,equateur,espagne,estonie,ethiopie,finland,france,gabon,gambie,ghana,grece,guatemala,guinee,haiti,hongrie,inde,indonesie,iran,iraq,islande,israel,italie,jamaique,japon,jordanie,kazakhstan,kenya,koweit,laos,lesotho,liban,libye,lituanie,luxembourg,madagascar,malaisie,malawi,maldives,mali,maroc,mauritanie,mexique,moldavie,mongolie,mozambique,myanmar,namibie,nepal,nicaragua,niger,nigeria,norvege,ouganda,pakistan,palestine,panama,paraguay,pays-bas,perou,philippines,pologne,portugal,qatar,roumanie,russie,rwanda,salvador,senegal,serbie,sierra,singapour,slovaquie,slovenie,somalie,soudan,suede,suisse,syrie,tanzanie,tchad,togo,tunisie,turquie,ukraine,uruguay,venezuela,vietnam,zambie,zimbabwe'.split(','));
+
+const BASE_MARQUES = new Set('adidas,airbnb,airbus,alibaba,amazon,apple,audi,bmw,boeing,booking,canon,carrefour,coca,deezer,dell,disney,dyson,ebay,ferrari,fiat,ford,google,gucci,honda,huawei,hyundai,ikea,intel,jaguar,jeep,kia,lacoste,lamborghini,lego,lenovo,lexus,lg,lidl,logitech,louis,lvmh,mazda,mercedes,microsoft,mitsubishi,netflix,nike,nintendo,nissan,nvidia,opel,oracle,peugeot,philips,playstation,porsche,prada,puma,rayban,renault,samsung,seat,shell,siemens,snapchat,sony,spotify,subaru,suzuki,tesla,tiktok,toyota,twitter,uber,vans,volkswagen,volvo,walmart,whatsapp,xiaomi,yamaha,youtube,zara'.split(','));
+
+const BASE_METIERS = new Set('acteur,actrice,administrateur,agriculteur,aide,ambulancier,animateur,architecte,artiste,astronaute,attorney,auteur,avocat,avocate,banquier,biologiste,boulanger,boucher,caissier,chauffeur,chercheur,chimiste,chirurgien,coiffeur,comptable,conducteur,cuisinier,dentiste,dessinateur,developpeur,directeur,docteur,économiste,educateur,électricien,enseignant,enseignante,entrepreneur,épicier,facteur,fermier,footballeur,formateur,géologue,gérant,informaticien,infirmier,infirmière,ingénieur,instituteur,journaliste,juge,kinésithérapeute,libraire,logisticien,maçon,médecin,menuisier,militaire,musicien,notaire,nutritionniste,opticien,ouvrier,pâtissier,pédiatre,peintre,pharmacien,photographe,pilote,plombier,policier,pompier,professeur,programmeur,psychologue,radiologue,restaurateur,scientifique,secrétaire,serveur,sociologue,soldat,technicien,urbaniste,vétérinaire,webdesigner,youtubeur,zoologue'.split(','));
+
+// Vérifie si le mot est dans une base locale (instantané, offline)
+function estDansBaseLocale(mot, catId) {
+  const m = mot.toLowerCase().trim();
+  if (catId === 'prenom_garcon' || catId === 'prenom_fille') return BASE_PRENOMS.has(m);
+  if (catId === 'ville') return BASE_VILLES.has(m);
+  if (catId === 'pays') return BASE_PAYS.has(m);
+  if (catId === 'marque' || catId === 'marque_voiture') return BASE_MARQUES.has(m);
+  if (catId === 'metier') return BASE_METIERS.has(m);
+  return false;
+}
+
+async function motExisteFR(mot, catId) {
   const cle = mot.toLowerCase().trim();
   if (cle.length < 2) return false;
   if (cacheValidation[cle] !== undefined) return cacheValidation[cle];
 
-  // API 1 : Free Dictionary API (supporte le français via langue fr)
-  try {
-    const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/fr/${encodeURIComponent(cle)}`);
-    if (r.ok) { cacheValidation[cle] = true; return true; }
-  } catch(e) {}
+  // 1. Vérifier base locale instantanée
+  if (estDansBaseLocale(cle, catId)) {
+    cacheValidation[cle] = true; return true;
+  }
 
-  // API 2 : Wiktionary API (source ouverte, très complet en français)
+  // 2. Appels APIs en PARALLÈLE avec timeout 5s
+  const timeout = (ms) => new Promise((_,r) => setTimeout(() => r(new Error('timeout')), ms));
+
+  const apis = [
+    // Wiktionnaire français (mots communs + noms propres)
+    fetch(`https://fr.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(cle)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && d.type !== 'disambiguation' && d.extract && d.extract.length > 5),
+    // Wikipedia FR (noms propres, célébrités, villes, pays)
+    fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cle)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && d.extract && d.extract.length > 15),
+    // Recherche Wikipedia (pour variations orthographiques)
+    fetch(`https://fr.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cle)}&limit=1&format=json&origin=*`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && d[1] && d[1].length > 0 && d[1][0].toLowerCase().startsWith(cle[0])),
+  ];
+
   try {
-    const url = `https://fr.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(cle)}`;
-    const r = await fetch(url);
-    if (r.ok) {
-      const d = await r.json();
-      // Vérifier que c'est bien un mot (pas une page d'homonymie vide)
-      const valide = d.type !== 'disambiguation' && d.extract && d.extract.length > 10;
-      cacheValidation[cle] = valide;
-      return valide;
+    // Prendre le premier résultat positif, ou attendre 5s max
+    const results = await Promise.race([
+      Promise.all(apis.map(p => p.catch(() => false))),
+      timeout(5000).then(() => [null])
+    ]);
+
+    if (results[0] === null) {
+      // Timeout — accepter par défaut (offline-friendly)
+      cacheValidation[cle] = true; return true;
     }
-  } catch(e) {}
 
-  // API 3 : Recherche Wikipedia FR comme fallback pour noms propres (célébrités, villes, pays)
-  try {
-    const url = `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cle)}`;
-    const r = await fetch(url);
-    if (r.ok) {
-      const d = await r.json();
-      if (d.extract && d.extract.length > 20) { cacheValidation[cle] = true; return true; }
-    }
-  } catch(e) {}
+    const valide = results.some(r => r === true);
+    cacheValidation[cle] = valide;
+    return valide;
 
-  cacheValidation[cle] = false;
-  return false;
+  } catch(e) {
+    // Erreur réseau — accepter par défaut
+    cacheValidation[cle] = true; return true;
+  }
 }
 
 // Validation par catégorie avec règles spécifiques
@@ -1715,7 +1764,7 @@ async function validerMotCategorie(mot, catId, lettre) {
   // Pas de chiffres
   if (/\d/.test(m)) return { valide: false, raison: 'Contient des chiffres' };
 
-  const existe = await motExisteFR(m);
+  const existe = await motExisteFR(m, catId);
   if (!existe) return { valide: false, raison: 'Mot introuvable' };
   return { valide: true, raison: '' };
 }
@@ -2468,9 +2517,26 @@ function demarrerTourSolo() {
 }
 
 // Override valider pour le mode solo
-const _validerOriginal = valider;
+// _validerOriginal = la fonction multijoueur définie plus haut
+const _validerOriginal = async function(auto=false) {
+  // Copie de la fonction valider multijoueur originale
+  stopTimer();
+  document.getElementById('btn-val').disabled=true;
+  document.getElementById('jstat').textContent='Envoi des reponses...';
+  const l=lettreActuelle;
+  CATS.forEach(cat=>{ const inp=document.getElementById('r-'+cat.id); const v=inp?inp.value.trim():''; repsLocales[cat.id]=(v&&v[0].toUpperCase()===l)?v:''; });
+  if (!salonData) { document.getElementById('oa').classList.remove('cache'); document.getElementById('jstat').textContent=''; return; }
+  const tn=salonData.tourActuel||parseInt((salonData.etat||'').split('_')[1])||1;
+  const bonus=Math.round((tRestant/tDuree)*BONUS_MAX);
+  try {
+    await set(ref(db,`salons/${salonData.code}/reponsesTours/${tn}/${J.uid}`),{reponses:repsLocales,bonus,pseudo:J.pseudo,emoji:J.emoji||'',avatarImg:J.avatarImg||null,tempsRestant:tRestant,ts:serverTimestamp()});
+    document.getElementById('oa').classList.remove('cache');
+    document.getElementById('jstat').textContent='';
+  } catch(e){notif('Erreur envoi: '+e.message,'e');document.getElementById('btn-val').disabled=false;document.getElementById('jstat').textContent='';console.error(e);}
+};
+
 window.valider = async function(auto=false) {
-  if (!soloEtat.modeActif) { _validerOriginal(auto); return; }
+  if (!soloEtat.modeActif) { await _validerOriginal(auto); return; }
   stopTimer();
   document.getElementById('btn-val').disabled = true;
   const lettre = lettreActuelle;
@@ -2483,23 +2549,20 @@ window.valider = async function(auto=false) {
   document.getElementById('jstat').textContent = 'Vérification des mots...';
   // En mode solo : on n'affiche JAMAIS l'overlay multijoueur
   // On désactive le bouton et on attend juste la vérif
-  // Valider chaque mot — avec timeout de sécurité de 8s par mot
+  // Validation LOCALE en mode solo (pas d'appel Wikipedia = pas de blocage)
+  // Règle : le mot doit commencer par la bonne lettre et faire au moins 2 caractères
   let sc = 0; const detail = {};
   const motsInvalides = [];
   for (const cat of cats) {
     const val = repsLocales[cat.id] || '';
     if (!val) { detail[cat.id] = { val:'', pts:0, statut:'vide' }; continue; }
-    try {
-      const res = await Promise.race([
-        validerMotCategorie(val, cat.id, lettre),
-        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
-      ]);
-      if (res.valide) { sc += cat.pts; detail[cat.id] = { val, pts:cat.pts, statut:'valide' }; }
-      else { detail[cat.id] = { val, pts:0, statut:'invalide' }; motsInvalides.push(val); }
-    } catch(e) {
-      // En cas d'erreur ou timeout : accepter le mot (mode offline-friendly)
+    const valide = val.length >= 2 && val[0].toUpperCase() === lettre;
+    if (valide) {
       sc += cat.pts;
       detail[cat.id] = { val, pts:cat.pts, statut:'valide' };
+    } else {
+      detail[cat.id] = { val, pts:0, statut:'invalide' };
+      motsInvalides.push(val);
     }
   }
   sc += bonus;
