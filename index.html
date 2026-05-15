@@ -50,8 +50,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 .oe{aspect-ratio:1;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid var(--bord);transition:all .2s;background:rgba(255,255,255,.02);}
 .oe:hover{border-color:var(--cyan);transform:scale(1.05);}
 .oe.sel{border-color:var(--or);box-shadow:0 0 15px rgba(255,215,0,.3);}
-.gp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0;max-height:230px;overflow-y:auto;}
-.ip{aspect-ratio:1;border-radius:12px;cursor:pointer;border:2px solid var(--bord);overflow:hidden;transition:all .2s;}
+.gp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0;max-height:320px;overflow-y:auto;}
+.ip{aspect-ratio:1;border-radius:12px;cursor:pointer;border:2px solid var(--bord);overflow:hidden;transition:all .2s;position:relative;background:var(--carte);}.ip img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;}
 .ip img{width:100%;height:100%;object-fit:cover;display:block;}
 .ip:hover{border-color:var(--cyan);transform:scale(1.03);}
 .ip.sel{border-color:var(--or);box-shadow:0 0 12px rgba(255,215,0,.3);}
@@ -1305,8 +1305,7 @@ function initApp() {
     else el.innerHTML = '<span style="color:var(--rose);">● Hors ligne — Vérifiez votre connexion</span>';
   });
   // Exposer fonctions globales
-  // NE PAS exposer valider ici — le mode solo le redéfinit plus bas via window.valider
-  window.valider = valider; // valeur par défaut (multijoueur)
+  // window.valider est défini plus bas par l'override solo — ne pas l'écraser ici
   Object.assign(window, {
     allerEcran,allerProfil,allerBoutique,allerCreerSalon,rejoindre,quitterSalon,lancerPartie,
     demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
@@ -1642,7 +1641,7 @@ function lancerTimer(sec) {
   timer=setInterval(()=>{ tRestant--; upd(); if(tRestant<=0){stopTimer();autoSoum();} },1000);
 }
 function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
-function autoSoum(){notif('⏰ Temps écoulé !','e');valider(true);}
+function autoSoum(){notif('Temps ecoule !','e');window.valider(true);}
 
 // ══════════════ ARRÊT ══════════════
 function demanderArret(){document.getElementById('modal-arret').style.display='flex';}
@@ -2535,6 +2534,7 @@ const _validerOriginal = async function(auto=false) {
   } catch(e){notif('Erreur envoi: '+e.message,'e');document.getElementById('btn-val').disabled=false;document.getElementById('jstat').textContent='';console.error(e);}
 };
 
+// Cette fonction est la seule version de valider exposée globalement
 window.valider = async function(auto=false) {
   if (!soloEtat.modeActif) { await _validerOriginal(auto); return; }
   stopTimer();
