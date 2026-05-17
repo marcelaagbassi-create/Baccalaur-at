@@ -1787,47 +1787,68 @@ async function motExisteFR(mot, catId) {
   if (cle.length < 2) return false;
   if (cacheValidation[cle] !== undefined) return cacheValidation[cle];
 
-  // 1. Vérifier base locale instantanée
+  // 1. Base locale — réponse immédiate et fiable
   if (estDansBaseLocale(cle, catId)) {
     cacheValidation[cle] = true; return true;
   }
 
-  // 2. Appels APIs en PARALLÈLE avec timeout 5s
-  const timeout = (ms) => new Promise((_,r) => setTimeout(() => r(new Error('timeout')), ms));
+  // 2. Vérification stricte via APIs — on n'accepte PAS par défaut si elles répondent
+  let reseauOk = false; // pour savoir si au moins une API a répondu
 
-  const apis = [
-    // Wiktionnaire français (mots communs + noms propres)
-    fetch(`https://fr.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(cle)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d && d.type !== 'disambiguation' && d.extract && d.extract.length > 5),
-    // Wikipedia FR (noms propres, célébrités, villes, pays)
-    fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cle)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d && d.extract && d.extract.length > 15),
-    // Recherche Wikipedia (pour variations orthographiques)
-    fetch(`https://fr.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cle)}&limit=1&format=json&origin=*`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d && d[1] && d[1].length > 0 && d[1][0].toLowerCase().startsWith(cle[0])),
-  ];
+  const T = 6000; // timeout global
+  const tf = (ms) => new Promise((_,r) => setTimeout(() => r('timeout'), ms));
+
+  // Fonction de vérification d'une API individuelle
+  const verif = async (url, check) => {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return false;
+      const d = await r.json();
+      reseauOk = true;
+      return check(d);
+    } catch(e) { return null; } // null = pas de réponse réseau
+  };
 
   try {
-    // Prendre le premier résultat positif, ou attendre 5s max
-    const results = await Promise.race([
-      Promise.all(apis.map(p => p.catch(() => false))),
-      timeout(5000).then(() => [null])
+    const [wikt, wiki, search] = await Promise.race([
+      Promise.all([
+        // Wiktionnaire : mot du dictionnaire français
+        verif(
+          'https://fr.wiktionary.org/api/rest_v1/page/summary/' + encodeURIComponent(cle),
+          d => d.type !== 'disambiguation' && d.extract && d.extract.length > 10
+        ),
+        // Wikipedia : noms propres (villes, pays, célébrités, marques)
+        verif(
+          'https://fr.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(cle),
+          d => d.extract && d.extract.length > 20 && d.type !== 'disambiguation'
+        ),
+        // Recherche Wikipedia : vérifie que le premier résultat correspond exactement
+        verif(
+          'https://fr.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(cle) + '&limit=3&format=json&origin=*',
+          d => {
+            if (!d || !d[1] || d[1].length === 0) return false;
+            // Le résultat doit correspondre exactement au début du mot saisi
+            return d[1].some(r => r.toLowerCase() === cle || r.toLowerCase().startsWith(cle));
+          }
+        ),
+      ]),
+      tf(T).then(() => ['timeout', 'timeout', 'timeout'])
     ]);
 
-    if (results[0] === null) {
-      // Timeout — accepter par défaut (offline-friendly)
+    // Si toutes les APIs ont timeout → réseau HS → accepter (pas de punition injuste)
+    if (wikt === 'timeout' && wiki === 'timeout' && search === 'timeout') {
       cacheValidation[cle] = true; return true;
     }
 
-    const valide = results.some(r => r === true);
+    // Si au moins une API a répondu : être STRICT
+    // Le mot est valide seulement si au moins une source confirme
+    const valide = wikt === true || wiki === true || search === true;
+
     cacheValidation[cle] = valide;
     return valide;
 
   } catch(e) {
-    // Erreur réseau — accepter par défaut
+    // Erreur inattendue → accepter pour ne pas pénaliser
     cacheValidation[cle] = true; return true;
   }
 }
@@ -2629,14 +2650,26 @@ window.valider = async function(auto=false) {
   document.getElementById('jstat').textContent = 'Vérification des mots...';
   // En mode solo : on n'affiche JAMAIS l'overlay multijoueur
   // On désactive le bouton et on attend juste la vérif
-  // Validation LOCALE en mode solo (pas d'appel Wikipedia = pas de blocage)
-  // Règle : le mot doit commencer par la bonne lettre et faire au moins 2 caractères
+  // Validation des mots avec vérification réelle (base locale + APIs)
   let sc = 0; const detail = {};
   const motsInvalides = [];
   for (const cat of cats) {
     const val = repsLocales[cat.id] || '';
     if (!val) { detail[cat.id] = { val:'', pts:0, statut:'vide' }; continue; }
-    const valide = val.length >= 2 && val[0].toUpperCase() === lettre;
+    // Vérif lettre de base
+    if (val[0].toUpperCase() !== lettre || val.length < 2) {
+      detail[cat.id] = { val, pts:0, statut:'invalide' };
+      motsInvalides.push(val);
+      continue;
+    }
+    // Vérif base locale instantanée + API avec timeout 5s
+    let valide = false;
+    try {
+      valide = await Promise.race([
+        motExisteFR(val, cat.id),
+        new Promise(resolve => setTimeout(() => resolve(true), 5000)) // timeout → accepter
+      ]);
+    } catch(e) { valide = true; }
     if (valide) {
       sc += cat.pts;
       detail[cat.id] = { val, pts:cat.pts, statut:'valide' };
