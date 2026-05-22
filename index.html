@@ -1551,123 +1551,275 @@ function majPeersVoix(peers) {
   }).join('');
 }
 
-// WebRTC Signaling via Firebase
-const RTC_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+// ══════════════ WebRTC VOIX TEMPS RÉEL ══════════════
+// STUN public + TURN gratuit openrelay pour traverser les NAT mobiles
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    // TURN openrelay — permet la connexion même derrière un NAT strict (mobile 4G/5G)
+    { urls: 'turn:openrelay.metered.ca:80',    username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443',   username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
+
+// File d'attente ICE pour chaque pair (avant que remote desc soit settée)
+const iceQueue = {};
 
 function signalerPresence() {
   if (!rtcCode) return;
-  // Annoncer qu'on est là — les autres vont créer une offre vers nous
-  set(ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid + '/presence'), {
-    uid: J.uid, pseudo: J.pseudo, ts: Date.now()
+  // Nettoyer les vieilles données RTC de cet utilisateur
+  set(ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid), {
+    presence: { uid: J.uid, pseudo: J.pseudo || 'Joueur', ts: Date.now() }
   });
 }
 
 function ecouterSignaux() {
   if (!rtcCode) return;
-  const rtcRef = ref(db, 'salons/' + rtcCode + '/rtc');
 
+  // 1. Écouter l'arrivée de nouveaux pairs
+  const rtcRef = ref(db, 'salons/' + rtcCode + '/rtc');
   onChildAdded(rtcRef, async (snap) => {
     const uid = snap.key;
-    if (uid === J.uid) return;
-    const data = snap.val();
-    if (!data) return;
-
-    // Nouveau pair — créer connexion et envoyer offre
-    if (data.presence && !rtcPeers[uid]) {
-      await creerOffre(uid, data.presence.pseudo);
+    if (uid === J.uid || !snap.val() || !snap.val().presence) return;
+    if (!rtcPeers[uid]) {
+      // Le pair qui arrive EN PREMIER crée l'offre (uid < uid = offrant)
+      if (J.uid < uid) {
+        await creerOffre(uid, snap.val().presence.pseudo || 'Joueur');
+      }
     }
   });
+  // Aussi écouter les changements (quelqu'un active le micro après)
+  onValue(rtcRef, async (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    Object.entries(data).forEach(async ([uid, val]) => {
+      if (uid === J.uid || !val || !val.presence || rtcPeers[uid]) return;
+      if (J.uid < uid) {
+        await creerOffre(uid, val.presence.pseudo || 'Joueur');
+      }
+    });
+  });
 
-  // Écouter les signaux qui nous sont destinés
-  const monRef = ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid + '/signaux');
-  onChildAdded(monRef, async (snap) => {
+  // 2. Écouter les signaux qui nous sont destinés (polling via onChildAdded)
+  const monSignauxRef = ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid + '/signaux');
+  onChildAdded(monSignauxRef, async (snap) => {
     const sig = snap.val();
-    if (!sig) return;
+    if (!sig || !sig.type) return;
     const de = sig.de;
+    console.log('[RTC] signal recu:', sig.type, 'de', de);
 
-    if (sig.type === 'offer') {
-      await gererOffre(de, sig.sdp, sig.pseudo);
-    } else if (sig.type === 'answer') {
-      const pc = rtcPeers[de];
-      if (pc) await pc.setRemoteDescription({ type: 'answer', sdp: sig.sdp });
-    } else if (sig.type === 'ice') {
-      const pc = rtcPeers[de];
-      if (pc && sig.candidate) await pc.addIceCandidate(sig.candidate).catch(() => {});
+    try {
+      if (sig.type === 'offer') {
+        await gererOffre(de, sig.sdp, sig.pseudo || 'Joueur');
+      } else if (sig.type === 'answer') {
+        const pc = rtcPeers[de];
+        if (pc && pc.signalingState !== 'stable') {
+          await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: sig.sdp }));
+          // Vider la file d'attente ICE
+          if (iceQueue[de]) {
+            for (const c of iceQueue[de]) {
+              await pc.addIceCandidate(new RTCIceCandidate(c)).catch(e => console.warn('ICE queue:', e));
+            }
+            iceQueue[de] = [];
+          }
+        }
+      } else if (sig.type === 'ice') {
+        const pc = rtcPeers[de];
+        if (pc) {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
+            await pc.addIceCandidate(new RTCIceCandidate(sig.candidate)).catch(e => console.warn('ICE:', e));
+          } else {
+            // Mettre en file d'attente
+            if (!iceQueue[de]) iceQueue[de] = [];
+            iceQueue[de].push(sig.candidate);
+          }
+        }
+      }
+    } catch(e) {
+      console.error('[RTC] erreur signal:', e);
     }
-    // Supprimer le signal traité
-    set(snap.ref, null);
+    // Supprimer le signal après traitement
+    set(snap.ref, null).catch(() => {});
   });
 }
 
 async function creerOffre(uid, pseudo) {
+  if (rtcPeers[uid]) return; // Déjà créé
+  console.log('[RTC] création offre pour', uid);
   const pc = new RTCPeerConnection(RTC_CONFIG);
   rtcPeers[uid] = pc;
+  iceQueue[uid] = [];
 
   // Ajouter le stream local
-  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  if (localStream) {
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  }
 
   // Recevoir audio distant
-  pc.ontrack = (e) => jouerAudioDistant(uid, pseudo, e.streams[0]);
+  pc.ontrack = (e) => {
+    console.log('[RTC] track reçu de', uid);
+    if (e.streams && e.streams[0]) jouerAudioDistant(uid, pseudo, e.streams[0]);
+  };
 
-  // ICE candidates
+  // ICE candidates — envoyer immédiatement
   pc.onicecandidate = (e) => {
     if (e.candidate) {
-      envoyerSignal(uid, { type: 'ice', de: J.uid, candidate: e.candidate });
+      console.log('[RTC] ICE candidate envoyé à', uid);
+      envoyerSignal(uid, { type: 'ice', de: J.uid, candidate: e.candidate.toJSON() });
     }
   };
 
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  envoyerSignal(uid, { type: 'offer', de: J.uid, sdp: offer.sdp, pseudo: J.pseudo });
+  pc.oniceconnectionstatechange = () => {
+    console.log('[RTC] ICE state with', uid, ':', pc.iceConnectionState);
+    if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+      majStatutPeer(uid, pseudo, true);
+    } else if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+      majStatutPeer(uid, pseudo, false);
+      delete rtcPeers[uid];
+    }
+  };
+
+  try {
+    const offer = await pc.createOffer({ offerToReceiveAudio: true });
+    await pc.setLocalDescription(offer);
+    envoyerSignal(uid, { type: 'offer', de: J.uid, sdp: offer.sdp, pseudo: J.pseudo || 'Joueur' });
+    console.log('[RTC] offre envoyée à', uid);
+  } catch(e) {
+    console.error('[RTC] erreur création offre:', e);
+  }
 }
 
 async function gererOffre(uid, sdp, pseudo) {
+  if (rtcPeers[uid]) {
+    // Déjà une connexion — ignorer (évite les offres croisées)
+    return;
+  }
+  console.log('[RTC] gestion offre de', uid);
   const pc = new RTCPeerConnection(RTC_CONFIG);
   rtcPeers[uid] = pc;
+  iceQueue[uid] = [];
 
-  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-  pc.ontrack = (e) => jouerAudioDistant(uid, pseudo, e.streams[0]);
-  pc.onicecandidate = (e) => {
-    if (e.candidate) envoyerSignal(uid, { type: 'ice', de: J.uid, candidate: e.candidate });
+  if (localStream) {
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  }
+
+  pc.ontrack = (e) => {
+    console.log('[RTC] track reçu de', uid);
+    if (e.streams && e.streams[0]) jouerAudioDistant(uid, pseudo, e.streams[0]);
   };
 
-  await pc.setRemoteDescription({ type: 'offer', sdp });
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  envoyerSignal(uid, { type: 'answer', de: J.uid, sdp: answer.sdp });
+  pc.onicecandidate = (e) => {
+    if (e.candidate) {
+      envoyerSignal(uid, { type: 'ice', de: J.uid, candidate: e.candidate.toJSON() });
+    }
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    console.log('[RTC] ICE state with', uid, ':', pc.iceConnectionState);
+    if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+      majStatutPeer(uid, pseudo, true);
+    } else if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+      majStatutPeer(uid, pseudo, false);
+      delete rtcPeers[uid];
+    }
+  };
+
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp }));
+    // Vider ICE queue
+    if (iceQueue[uid]) {
+      for (const c of iceQueue[uid]) {
+        await pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+      }
+      iceQueue[uid] = [];
+    }
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    envoyerSignal(uid, { type: 'answer', de: J.uid, sdp: answer.sdp });
+    console.log('[RTC] answer envoyé à', uid);
+  } catch(e) {
+    console.error('[RTC] erreur gestion offre:', e);
+  }
 }
 
 function envoyerSignal(uid, data) {
   if (!rtcCode) return;
   const sigRef = ref(db, 'salons/' + rtcCode + '/rtc/' + uid + '/signaux');
-  set(push(sigRef), data);
+  push(sigRef).then(r => set(r, data)).catch(e => console.warn('[RTC] signal err:', e));
+}
+
+function majStatutPeer(uid, pseudo, connecte) {
+  const box = document.getElementById('voice-peers');
+  if (!box) return;
+  let el = document.getElementById('vpeer-' + uid);
+  if (connecte) {
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'vpeer-' + uid;
+      el.className = 'voice-peer';
+      el.setAttribute('data-uid', uid);
+      el.innerHTML = '<div class="vdot"></div><span>' + pseudo + '</span>';
+      box.appendChild(el);
+    }
+    // Retirer le message "Appuie pour parler"
+    const hint = box.querySelector('span');
+    if (hint && !hint.id) hint.remove();
+  } else {
+    if (el) el.remove();
+    if (box.children.length === 0) {
+      box.innerHTML = '<span style="font-size:.62rem;color:var(--muet);">Appuie pour parler</span>';
+    }
+  }
 }
 
 function jouerAudioDistant(uid, pseudo, stream) {
+  console.log('[RTC] lecture audio pour', uid);
   let audio = document.getElementById('audio-' + uid);
   if (!audio) {
     audio = document.createElement('audio');
     audio.id = 'audio-' + uid;
     audio.autoplay = true;
     audio.playsInline = true;
+    audio.setAttribute('playsinline', '');
+    audio.volume = 1.0;
     document.body.appendChild(audio);
   }
   audio.srcObject = stream;
-  // Détecter si le pair parle (volume)
+  // Forcer la lecture (contourner les restrictions autoplay mobiles)
+  const jouer = () => {
+    audio.play().then(() => {
+      console.log('[RTC] audio joue pour', uid);
+      majStatutPeer(uid, pseudo, true);
+    }).catch(e => {
+      console.warn('[RTC] autoplay bloqué:', e);
+      // Réessayer au premier clic
+      document.addEventListener('click', () => audio.play().catch(() => {}), { once: true });
+    });
+  };
+  if (audio.readyState >= 2) jouer();
+  else audio.addEventListener('loadeddata', jouer, { once: true });
+
+  // Détecter le volume pour l'indicateur visuel
   try {
-    const ctx = new AudioContext();
+    if (!window._rtcAudioCtx) window._rtcAudioCtx = new AudioContext();
+    const ctx = window._rtcAudioCtx;
+    if (ctx.state === 'suspended') ctx.resume();
     const src = ctx.createMediaStreamSource(stream);
     const anal = ctx.createAnalyser();
     anal.fftSize = 256;
     src.connect(anal);
     const buf = new Uint8Array(anal.frequencyBinCount);
-    setInterval(() => {
+    const intervalle = setInterval(() => {
+      if (!rtcPeers[uid]) { clearInterval(intervalle); return; }
       anal.getByteFrequencyData(buf);
-      const vol = buf.reduce((a,b) => a+b, 0) / buf.length;
-      const peer = document.querySelector('[data-uid="' + uid + '"]');
-      if (peer) peer.classList.toggle('parle', vol > 15);
-    }, 200);
-  } catch(e) {}
+      const vol = buf.reduce((a, b) => a + b, 0) / buf.length;
+      const el = document.getElementById('vpeer-' + uid);
+      if (el) el.classList.toggle('parle', vol > 10);
+    }, 150);
+  } catch(e) { console.warn('[RTC] analyser:', e); }
 }
 
 // ══════════════ CHAT TEMPS RÉEL ══════════════
