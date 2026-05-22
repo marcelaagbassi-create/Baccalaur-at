@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BACCALAURÉAT ⚡</title>
+<script>
+// Bloquer le swipe-back et le bouton retour navigateur
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', function() {
+  history.pushState(null, '', location.href);
+});
+</script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#050510">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +23,7 @@
 :root{--or:#C8960C;--cyan:#4ECDC4;--rose:#8B3A0F;--vert:#5B8A3C;--bg:#F0E6C8;--carte:#FAF3DC;--bord:#C8A96E;--texte:#3D2408;--muet:#8B6914;--accent:#B8860B;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;width:100%;overflow-x:hidden;background:var(--bg);color:var(--texte);font-family:'Rajdhani',sans-serif;}
+body{overscroll-behavior:none;}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(200,150,12,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(200,150,12,.06) 1px,transparent 1px);background-size:40px 40px;}
 body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 50%,rgba(78,205,196,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(200,150,12,.07) 0%,transparent 60%);}
 .app{position:relative;z-index:1;min-height:100vh;}
@@ -208,6 +216,173 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
 
+/* ═══ MUSIQUE & VOIX ═══ */
+.music-btn{
+  position:fixed;top:12px;right:12px;z-index:900;
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(200,150,12,.15);
+  border:1.5px solid var(--bord);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.music-btn:active{transform:scale(.9);}
+.music-btn.mute{opacity:.4;}
+/* Voix panel */
+.voice-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+  border-top:1px solid var(--bord);
+  background:var(--bg);
+  flex-shrink:0;
+}
+.voice-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:24px;
+  border:1.5px solid var(--bord);
+  background:var(--carte);cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:.62rem;
+  letter-spacing:1px;transition:all .2s;
+}
+.voice-btn.actif{
+  background:var(--rose);border-color:var(--rose);color:#fff;
+  box-shadow:0 0 12px rgba(139,58,15,.4);
+}
+.voice-btn.actif .voice-dot{background:#fff;animation:voicePulse .8s ease-in-out infinite;}
+.voice-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--muet);flex-shrink:0;
+}
+.voice-peers{
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+  flex:1;padding:0 8px;
+}
+.voice-peer{
+  display:flex;align-items:center;gap:4px;
+  font-size:.65rem;color:var(--muet);
+  padding:3px 8px;border-radius:12px;
+  border:1px solid var(--bord);background:var(--carte);
+}
+.voice-peer.parle{border-color:var(--vert);color:var(--vert);}
+.voice-peer .vdot{
+  width:6px;height:6px;border-radius:50%;background:var(--muet);
+}
+.voice-peer.parle .vdot{background:var(--vert);animation:voicePulse .6s ease-in-out infinite;}
+@keyframes voicePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+
+/* ═══ CHAT ═══ */
+.chat-wrap{
+  position:fixed;bottom:0;left:0;right:0;z-index:800;
+  display:flex;flex-direction:column;
+  pointer-events:none;
+}
+.chat-bubble-btn{
+  position:fixed;bottom:18px;right:18px;z-index:801;
+  width:50px;height:50px;border-radius:50%;
+  background:var(--cyan);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+  transition:transform .2s;pointer-events:all;
+}
+.chat-bubble-btn:active{transform:scale(.92);}
+.chat-badge{
+  position:absolute;top:-4px;right:-4px;
+  background:var(--rose);color:#fff;
+  border-radius:50%;width:18px;height:18px;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  display:none;
+}
+.chat-panel{
+  position:fixed;bottom:0;left:0;right:0;
+  max-height:70vh;
+  background:var(--carte);
+  border-top:2px solid var(--bord);
+  border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  pointer-events:all;
+  z-index:802;
+  box-shadow:0 -8px 32px rgba(0,0,0,.15);
+}
+/* Mini : seul le header est visible (barre collée en bas) */
+.chat-panel.mini{
+  transform:translateY(calc(100% - 52px));
+}
+.chat-panel.ouvert{transform:translateY(0);}
+/* Quand le chat est mini, les messages et input sont cachés */
+.chat-panel.mini .chat-messages,
+.chat-panel.mini .chat-input-row,
+.chat-panel.mini .voice-bar{ display:none; }
+.chat-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--bord);
+  flex-shrink:0;
+}
+.chat-header-title{
+  font-family:'Orbitron',monospace;font-size:.75rem;
+  letter-spacing:2px;color:var(--cyan);
+}
+.chat-close{
+  background:none;border:none;cursor:pointer;
+  color:var(--muet);font-size:1.2rem;padding:4px 8px;
+}
+.chat-messages{
+  flex:1;overflow-y:auto;padding:10px 14px;
+  display:flex;flex-direction:column;gap:6px;
+  min-height:120px;
+}
+.chat-msg{
+  display:flex;flex-direction:column;
+  max-width:82%;
+}
+.chat-msg.moi{align-self:flex-end;align-items:flex-end;}
+.chat-msg.autre{align-self:flex-start;align-items:flex-start;}
+.chat-msg.systeme{align-self:center;align-items:center;}
+.chat-msg-pseudo{
+  font-size:.6rem;letter-spacing:1px;
+  color:var(--muet);margin-bottom:2px;
+  font-family:'Orbitron',monospace;
+}
+.chat-msg-bulle{
+  padding:7px 12px;border-radius:16px;
+  font-size:.85rem;line-height:1.35;
+  word-break:break-word;
+}
+.chat-msg.moi .chat-msg-bulle{
+  background:var(--cyan);color:#fff;
+  border-bottom-right-radius:4px;
+}
+.chat-msg.autre .chat-msg-bulle{
+  background:var(--bg);color:var(--texte);
+  border:1px solid var(--bord);
+  border-bottom-left-radius:4px;
+}
+.chat-msg.systeme .chat-msg-bulle{
+  background:transparent;color:var(--muet);
+  font-size:.7rem;font-style:italic;
+  border:none;padding:2px 6px;
+}
+.chat-input-row{
+  display:flex;gap:8px;padding:10px 12px;
+  border-top:1px solid var(--bord);
+  flex-shrink:0;
+}
+.chat-input{
+  flex:1;padding:10px 14px;
+  border-radius:24px;border:1.5px solid var(--bord);
+  background:var(--bg);color:var(--texte);
+  font-size:.9rem;outline:none;
+}
+.chat-input:focus{border-color:var(--cyan);}
+.chat-send{
+  width:42px;height:42px;border-radius:50%;
+  background:var(--cyan);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+
 /* ═══ LOADER DAVIESLAY ═══ */
 /* Marque DAVIESLAY studio */
 .dv-brand-wrap{
@@ -374,6 +549,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 <symbol id="ic-dot-green" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#5B8A3C"/></symbol>
 <symbol id="ic-dot-yellow" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#C8960C"/></symbol>
 <symbol id="ic-dot-red" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#8B3A0F"/></symbol>
+<symbol id="ic-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+<symbol id="ic-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+<symbol id="ic-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
 <symbol id="ic-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></symbol>
 <symbol id="ic-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="7" y="7" width="1" height="1" fill="currentColor"/><rect x="16" y="7" width="1" height="1" fill="currentColor"/><rect x="7" y="16" width="1" height="1" fill="currentColor"/><line x1="14" y1="14" x2="17" y2="17"/><line x1="17" y1="14" x2="17" y2="20"/><line x1="14" y1="17" x2="17" y2="17"/><line x1="14" y1="20" x2="20" y2="20"/><line x1="20" y1="14" x2="20" y2="17"/></symbol>
 <symbol id="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
@@ -577,6 +755,53 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div class="muet">En attente du lancement par l'hôte...</div>
     </div>
     <button class="btn btn-rose mt2" onclick="quitterSalon()"><span class="ic" style="margin-right:7px;"><svg width="18" height="18"><use href="#ic-door"/></svg></span>QUITTER LE SALON</button>
+  </div>
+</div>
+
+<!-- CHAT TEMPS RÉEL -->
+<!-- Bouton musique flottant (toujours visible) -->
+<button class="music-btn" id="music-main-btn" onclick="toggleMusique()" title="Musique" style="display:flex;">
+  <span class="ic" id="music-main-icon"><svg width="16" height="16"><use href="#ic-speaker"/></svg></span>
+</button>
+
+<div id="chat-wrap" style="display:none;">
+  <!-- Pas de bouton flottant : la barre mini est toujours visible -->
+  <!-- Panel -->
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-header" onclick="toggleChat()" style="cursor:pointer;">
+      <span class="chat-header-title">
+        <span class="ic" style="margin-right:6px;color:var(--cyan);"><svg width="14" height="14"><use href="#ic-chat"/></svg></span>
+        CHAT EN DIRECT
+        <span id="chat-badge-mini" style="display:none;background:var(--rose);color:#fff;border-radius:10px;padding:1px 6px;font-size:.6rem;margin-left:6px;"></span>
+      </span>
+      <div style="display:flex;align-items:center;gap:8px;" onclick="event.stopPropagation()">
+        <button class="music-btn" id="music-toggle-btn" onclick="toggleMusique()" title="Musique" style="position:relative;top:auto;right:auto;width:32px;height:32px;">
+          <span class="ic" id="music-icon"><svg width="14" height="14"><use href="#ic-speaker"/></svg></span>
+        </button>
+        <!-- Flèche indiquant l'état -->
+        <span id="chat-arrow" style="color:var(--muet);font-size:1rem;transition:transform .3s;">▲</span>
+      </div>
+    </div>
+    <!-- Barre vocale -->
+    <div class="voice-bar" id="voice-bar">
+      <button class="voice-btn" id="voice-btn" onclick="toggleVoix()">
+        <div class="voice-dot" id="voice-dot"></div>
+        <span id="voice-btn-txt">PARLER</span>
+      </button>
+      <div class="voice-peers" id="voice-peers">
+        <span style="font-size:.62rem;color:var(--muet);">Appuie pour parler</span>
+      </div>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg systeme"><div class="chat-msg-bulle">Bienvenue dans le chat !</div></div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-input" type="text" placeholder="Écrire un message..." maxlength="200"
+        onkeydown="if(event.key==='Enter')envoyerMessage()">
+      <button class="chat-send" onclick="envoyerMessage()">
+        <span class="ic" style="color:#fff;"><svg width="18" height="18"><use href="#ic-send"/></svg></span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1003,7 +1228,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, update, onValue, off, serverTimestamp }
+import { getDatabase, ref, set, get, update, onValue, off, push, onChildAdded, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -1072,7 +1297,7 @@ const IDX = {
   legume:{A:'Artichaut',B:'Brocoli',C:'Carotte',D:'Daikons',E:'Épinard',F:'Fenouil',G:'Gombo',H:'Haricot',I:'Igname',J:'Jalapeño',L:'Laitue',M:'Maïs',N:'Navet',O:'Oignon',P:'Poireau',R:'Radis',S:'Salsifis',T:'Tomate',V:'Verveine',W:'Wasabi',X:'Xanthium',Y:'Yucca',Z:'Zucchini',Q:'Quinoa'},
   animal:{A:'Autruche',B:'Buffalo',C:'Crocodile',D:'Dauphin',E:'Éléphant',F:'Flamant',G:'Girafe',H:'Hippopotame',I:'Ibis',J:'Jaguar',L:'Lion',M:'Manchot',N:'Narval',O:'Ours',P:'Panthère',R:'Requin',S:'Serpent',T:'Tigre',V:'Vautour',W:'Wombat',X:'Xérus',Y:'Yak',Z:'Zèbre',Q:'Quokka'},
   metier:{A:'Architecte',B:'Boulanger',C:'Chirurgien',D:'Dentiste',E:'Électricien',F:'Forgeron',G:'Géologue',H:'Historien',I:'Infirmier',J:'Juriste',L:'Linguiste',M:'Mécanicien',N:'Notaire',O:'Ostéopathe',P:'Pompier',R:'Radiologue',S:'Soudeur',T:'Technicien',V:'Vétérinaire',W:'Webdesigner',X:'Xylophoniste',Y:'Yogi',Z:'Zoologiste',Q:'Quincailler'},
-  marque:{A:'Apple',B:'BMW',C:'Chanel',D:'Dior',E:'Emirates',F:'Fendi',G:'Gucci',H:'Hermès',I:'IKEA',J:'JBL',L:'Louis Vuitton',M:"McDonald's",N:'Nike',O:'OMEGA',P:'Prada',R:'Rolex',S:'Samsung',T:'Tesla',V:'Versace',W:'Walmart',X:'Xiaomi',Y:'YouTube',Z:'Zara',Q:'Qualcomm'},
+  marque:{A:'Apple',B:'BMW',C:'Chanel',D:'Dior',E:'Emirates',F:'Fendi',G:'Gucci',H:'Hermès',I:'IKEA',J:'JBL',L:'Louis Vuitton',M:'McDonalds',N:'Nike',O:'OMEGA',P:'Prada',R:'Rolex',S:'Samsung',T:'Tesla',V:'Versace',W:'Walmart',X:'Xiaomi',Y:'YouTube',Z:'Zara',Q:'Qualcomm'},
   celeb:{A:'Adele',B:'Beyoncé',C:'Cristiano',D:'Drake',E:'Elon Musk',F:'Federer',G:'Gigi Hadid',H:'Harry Styles',I:'Idris Elba',J:'Jay-Z',L:'LeBron',M:'Mbappé',N:'Neymar',O:'Obama',P:'Post Malone',R:'Rihanna',S:'Shakira',T:'Taylor Swift',V:'Valentino',W:'Will Smith',X:'Xavier Dolan',Y:'Yannick Noah',Z:'Zidane',Q:'Quavo'},
 };
 const ARTS = [
@@ -1114,6 +1339,483 @@ let tRestant = 0;
 let tDuree = 60;
 let listeners = [];
 let revCountdown = null;
+
+// ══════════════ BLOCAGE ACTUALISATION ══════════════
+// Bloquer Ctrl+R et F5 si partie en cours
+document.addEventListener('keydown', function(e) {
+  if ((e.key === 'F5') || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+    if (soloEtat && soloEtat.modeActif || salonData) {
+      e.preventDefault();
+      notif('Actualisation bloquée en cours de partie !', 'e');
+      return false;
+    }
+  }
+});
+// Pull-to-refresh bloqué via CSS overscroll-behavior:none (déjà appliqué)
+// beforeunload — avertir si partie en cours
+window.addEventListener('beforeunload', function(e) {
+  if ((soloEtat && soloEtat.modeActif) || salonData) {
+    e.preventDefault();
+    e.returnValue = 'Une partie est en cours. Veux-tu vraiment quitter ?';
+    return e.returnValue;
+  }
+});
+
+// ══════════════ MUSIQUE ══════════════
+let musiqueCtx = null;
+let musiqueActif = true;
+let musiqueNoeud = null;
+let musiqueGain = null;
+let musiqueStarted = false;
+
+function creerMusique() {
+  if (!musiqueActif || musiqueStarted) return;
+  try {
+    musiqueCtx = new (window.AudioContext || window.webkitAudioContext)();
+    musiqueGain = musiqueCtx.createGain();
+    musiqueGain.gain.value = 0.08;
+    musiqueGain.connect(musiqueCtx.destination);
+    jouerBoucle();
+    musiqueStarted = true;
+  } catch(e) { console.log('Audio non supporté'); }
+}
+
+function jouerBoucle() {
+  if (!musiqueCtx || !musiqueActif) return;
+  const bpm = 90;
+  const beat = 60 / bpm;
+  // Mélodie simple style jeu de mots (pentatonique)
+  const notes = [261.6, 293.7, 329.6, 392.0, 440.0, 392.0, 329.6, 293.7];
+  let t = musiqueCtx.currentTime + 0.1;
+  notes.forEach((freq, i) => {
+    const osc = musiqueCtx.createOscillator();
+    const env = musiqueCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    env.gain.setValueAtTime(0, t + i * beat);
+    env.gain.linearRampToValueAtTime(0.3, t + i * beat + 0.05);
+    env.gain.linearRampToValueAtTime(0, t + i * beat + beat * 0.8);
+    osc.connect(env);
+    env.connect(musiqueGain);
+    osc.start(t + i * beat);
+    osc.stop(t + i * beat + beat);
+  });
+  // Basse
+  const bassNotes = [130.8, 146.8, 164.8, 196.0];
+  bassNotes.forEach((freq, i) => {
+    const osc = musiqueCtx.createOscillator();
+    const env = musiqueCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    env.gain.setValueAtTime(0, t + i * beat * 2);
+    env.gain.linearRampToValueAtTime(0.15, t + i * beat * 2 + 0.02);
+    env.gain.linearRampToValueAtTime(0, t + i * beat * 2 + beat * 1.5);
+    osc.connect(env);
+    env.connect(musiqueGain);
+    osc.start(t + i * beat * 2);
+    osc.stop(t + i * beat * 2 + beat * 2);
+  });
+  // Répéter
+  musiqueNoeud = setTimeout(jouerBoucle, notes.length * beat * 1000 + 100);
+}
+
+function toggleMusique() {
+  musiqueActif = !musiqueActif;
+  if (musiqueActif) {
+    musiqueStarted = false;
+    creerMusique();
+  } else {
+    clearTimeout(musiqueNoeud);
+    if (musiqueCtx) { musiqueCtx.close(); musiqueCtx = null; musiqueStarted = false; }
+  }
+  // Mettre à jour icônes
+  const mute = !musiqueActif;
+  ['music-toggle-btn','music-main-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('mute', mute);
+  });
+  ['music-icon','music-main-icon'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = mute
+      ? '<svg width="16" height="16"><use href="#ic-stop"/></svg>'
+      : '<svg width="16" height="16"><use href="#ic-speaker"/></svg>';
+  });
+}
+
+// Démarrer musique au premier clic utilisateur (contournement autoplay)
+document.addEventListener('click', function startMusic() {
+  creerMusique();
+  document.removeEventListener('click', startMusic);
+}, { once: true });
+
+// ══════════════ VOCAL TEMPS RÉEL (WebRTC) ══════════════
+let localStream = null;
+let voixActif = false;
+let rtcPeers = {}; // {uid: RTCPeerConnection}
+let rtcCode = null;
+let rtcListener = null;
+
+async function toggleVoix() {
+  if (!voixActif) {
+    await activerVoix();
+  } else {
+    desactiverVoix();
+  }
+}
+
+async function activerVoix() {
+  // Vérification support micro
+  if (!window.isSecureContext) {
+    notif('La voix nécessite HTTPS. Utilise le lien GitHub Pages.', 'e'); return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    notif('Micro non supporté sur ce navigateur.', 'e'); return;
+  }
+  // Vérifier si RTCPeerConnection disponible
+  if (!window.RTCPeerConnection) {
+    notif('WebRTC non supporté sur ce navigateur.', 'e'); return;
+  }
+  try {
+    // Demander explicitement le micro avec feedback visuel
+    const btnTxt = document.getElementById('voice-btn-txt');
+    if (btnTxt) btnTxt.textContent = 'ACTIVATION...';
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
+      video: false
+    });
+    voixActif = true;
+    majBtnVoix();
+    if (chatCode) {
+      rtcCode = chatCode;
+      ecouterSignaux();
+      signalerPresence();
+      envoyerMsgSysteme(J.pseudo + ' a rejoint la discussion vocale');
+    }
+    notif('Micro activé !', 's');
+  } catch(e) {
+    const btnTxt = document.getElementById('voice-btn-txt');
+    if (btnTxt) btnTxt.textContent = 'PARLER';
+    if (e.name === 'NotAllowedError') {
+      notif('Accès micro refusé. Autorise le micro dans les paramètres du navigateur.', 'e');
+    } else if (e.name === 'NotFoundError') {
+      notif('Aucun micro détecté sur cet appareil.', 'e');
+    } else {
+      notif('Erreur micro : ' + e.name, 'e');
+    }
+  }
+}
+
+function desactiverVoix() {
+  voixActif = false;
+  if (localStream) {
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+  // Fermer toutes les connexions
+  Object.values(rtcPeers).forEach(pc => pc.close());
+  rtcPeers = {};
+  if (rtcListener && rtcCode) {
+    const sigRef = ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid);
+    off(sigRef);
+  }
+  majBtnVoix();
+  majPeersVoix({});
+  if (chatCode) envoyerMsgSysteme(J.pseudo + ' a quitté la discussion vocale');
+  notif('Micro désactivé.', 'i');
+}
+
+function majBtnVoix() {
+  const btn = document.getElementById('voice-btn');
+  const dot = document.getElementById('voice-dot');
+  const txt = document.getElementById('voice-btn-txt');
+  if (!btn) return;
+  btn.classList.toggle('actif', voixActif);
+  if (dot) dot.classList.toggle('actif', voixActif);
+  if (txt) txt.textContent = voixActif ? 'COUPER' : 'PARLER';
+}
+
+function majPeersVoix(peers) {
+  const box = document.getElementById('voice-peers');
+  if (!box) return;
+  const uids = Object.keys(peers).filter(u => u !== J.uid);
+  if (uids.length === 0) {
+    box.innerHTML = '<span style="font-size:.62rem;color:var(--muet);">Appuie pour parler</span>';
+    return;
+  }
+  box.innerHTML = uids.map(u => {
+    const p = peers[u];
+    return '<div class="voice-peer' + (p.parle ? ' parle' : '') + '">'
+      + '<div class="vdot"></div>'
+      + '<span>' + (p.pseudo || 'Joueur') + '</span>'
+      + '</div>';
+  }).join('');
+}
+
+// WebRTC Signaling via Firebase
+const RTC_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+function signalerPresence() {
+  if (!rtcCode) return;
+  // Annoncer qu'on est là — les autres vont créer une offre vers nous
+  set(ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid + '/presence'), {
+    uid: J.uid, pseudo: J.pseudo, ts: Date.now()
+  });
+}
+
+function ecouterSignaux() {
+  if (!rtcCode) return;
+  const rtcRef = ref(db, 'salons/' + rtcCode + '/rtc');
+
+  onChildAdded(rtcRef, async (snap) => {
+    const uid = snap.key;
+    if (uid === J.uid) return;
+    const data = snap.val();
+    if (!data) return;
+
+    // Nouveau pair — créer connexion et envoyer offre
+    if (data.presence && !rtcPeers[uid]) {
+      await creerOffre(uid, data.presence.pseudo);
+    }
+  });
+
+  // Écouter les signaux qui nous sont destinés
+  const monRef = ref(db, 'salons/' + rtcCode + '/rtc/' + J.uid + '/signaux');
+  onChildAdded(monRef, async (snap) => {
+    const sig = snap.val();
+    if (!sig) return;
+    const de = sig.de;
+
+    if (sig.type === 'offer') {
+      await gererOffre(de, sig.sdp, sig.pseudo);
+    } else if (sig.type === 'answer') {
+      const pc = rtcPeers[de];
+      if (pc) await pc.setRemoteDescription({ type: 'answer', sdp: sig.sdp });
+    } else if (sig.type === 'ice') {
+      const pc = rtcPeers[de];
+      if (pc && sig.candidate) await pc.addIceCandidate(sig.candidate).catch(() => {});
+    }
+    // Supprimer le signal traité
+    set(snap.ref, null);
+  });
+}
+
+async function creerOffre(uid, pseudo) {
+  const pc = new RTCPeerConnection(RTC_CONFIG);
+  rtcPeers[uid] = pc;
+
+  // Ajouter le stream local
+  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+  // Recevoir audio distant
+  pc.ontrack = (e) => jouerAudioDistant(uid, pseudo, e.streams[0]);
+
+  // ICE candidates
+  pc.onicecandidate = (e) => {
+    if (e.candidate) {
+      envoyerSignal(uid, { type: 'ice', de: J.uid, candidate: e.candidate });
+    }
+  };
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  envoyerSignal(uid, { type: 'offer', de: J.uid, sdp: offer.sdp, pseudo: J.pseudo });
+}
+
+async function gererOffre(uid, sdp, pseudo) {
+  const pc = new RTCPeerConnection(RTC_CONFIG);
+  rtcPeers[uid] = pc;
+
+  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  pc.ontrack = (e) => jouerAudioDistant(uid, pseudo, e.streams[0]);
+  pc.onicecandidate = (e) => {
+    if (e.candidate) envoyerSignal(uid, { type: 'ice', de: J.uid, candidate: e.candidate });
+  };
+
+  await pc.setRemoteDescription({ type: 'offer', sdp });
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  envoyerSignal(uid, { type: 'answer', de: J.uid, sdp: answer.sdp });
+}
+
+function envoyerSignal(uid, data) {
+  if (!rtcCode) return;
+  const sigRef = ref(db, 'salons/' + rtcCode + '/rtc/' + uid + '/signaux');
+  set(push(sigRef), data);
+}
+
+function jouerAudioDistant(uid, pseudo, stream) {
+  let audio = document.getElementById('audio-' + uid);
+  if (!audio) {
+    audio = document.createElement('audio');
+    audio.id = 'audio-' + uid;
+    audio.autoplay = true;
+    audio.playsInline = true;
+    document.body.appendChild(audio);
+  }
+  audio.srcObject = stream;
+  // Détecter si le pair parle (volume)
+  try {
+    const ctx = new AudioContext();
+    const src = ctx.createMediaStreamSource(stream);
+    const anal = ctx.createAnalyser();
+    anal.fftSize = 256;
+    src.connect(anal);
+    const buf = new Uint8Array(anal.frequencyBinCount);
+    setInterval(() => {
+      anal.getByteFrequencyData(buf);
+      const vol = buf.reduce((a,b) => a+b, 0) / buf.length;
+      const peer = document.querySelector('[data-uid="' + uid + '"]');
+      if (peer) peer.classList.toggle('parle', vol > 15);
+    }, 200);
+  } catch(e) {}
+}
+
+// ══════════════ CHAT TEMPS RÉEL ══════════════
+let chatOuvert = false;
+let chatListener = null;
+let chatNonLus = 0;
+let chatCode = null;
+let dernierMsgId = null;
+
+function initChat(codeSalon) {
+  chatCode = codeSalon;
+  chatNonLus = 0;
+  dernierMsgId = null;
+  document.getElementById('chat-wrap').style.display = 'block';
+  document.getElementById('chat-messages').innerHTML =
+    '<div class="chat-msg systeme"><div class="chat-msg-bulle">Chat ouvert — Salon ' + codeSalon + '</div></div>';
+  // Démarrer en mode mini (barre collée en bas)
+  ouvrirChatMini();
+
+  // Écouter les nouveaux messages en temps réel
+  const chatRef = ref(db, 'salons/' + codeSalon + '/chat');
+  if (chatListener) off(chatRef, 'child_added', chatListener);
+
+  chatListener = onChildAdded(chatRef, (snap) => {
+    const msg = snap.val();
+    if (!msg) return;
+    // Éviter les doublons
+    if (snap.key === dernierMsgId) return;
+    dernierMsgId = snap.key;
+    afficherMessage(msg);
+    // Badge non lus si chat fermé (mini) et message d'un autre
+    if (!chatOuvert && msg.uid !== J.uid) {
+      chatNonLus++;
+      const badge = document.getElementById('chat-badge-mini');
+      if (badge) {
+        badge.style.display = 'inline';
+        badge.textContent = chatNonLus > 9 ? '9+' : chatNonLus;
+      }
+    }
+  });
+}
+
+function afficherMessage(msg) {
+  const box = document.getElementById('chat-messages');
+  if (!box) return;
+  const estMoi = msg.uid === J.uid;
+  const estSys = msg.type === 'systeme';
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (estSys ? 'systeme' : estMoi ? 'moi' : 'autre');
+
+  if (!estSys) {
+    const pseudo = document.createElement('div');
+    pseudo.className = 'chat-msg-pseudo';
+    pseudo.textContent = estMoi ? 'Moi' : (msg.pseudo || 'Joueur');
+    div.appendChild(pseudo);
+  }
+
+  const bulle = document.createElement('div');
+  bulle.className = 'chat-msg-bulle';
+  bulle.textContent = msg.texte;
+  div.appendChild(bulle);
+
+  box.appendChild(div);
+  // Scroll automatique vers le bas
+  box.scrollTop = box.scrollHeight;
+}
+
+async function envoyerMessage() {
+  const input = document.getElementById('chat-input');
+  const texte = input.value.trim();
+  if (!texte || !chatCode) return;
+  input.value = '';
+
+  const msg = {
+    uid: J.uid,
+    pseudo: J.pseudo || 'Joueur',
+    texte: texte,
+    ts: Date.now(),
+    type: 'message'
+  };
+
+  try {
+    const chatRef = ref(db, 'salons/' + chatCode + '/chat');
+    const nouveau = push(chatRef);
+    await set(nouveau, msg);
+  } catch(e) {
+    notif('Erreur envoi message', 'e');
+  }
+}
+
+function toggleChat() {
+  const panel = document.getElementById('chat-panel');
+  const arrow = document.getElementById('chat-arrow');
+  const badge = document.getElementById('chat-badge-mini');
+
+  if (!chatOuvert) {
+    // Mini → Ouvert
+    chatOuvert = true;
+    panel.classList.remove('mini');
+    panel.classList.add('ouvert');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+    chatNonLus = 0;
+    if (badge) badge.style.display = 'none';
+    setTimeout(() => {
+      const inp = document.getElementById('chat-input');
+      if (inp) inp.focus();
+      const box = document.getElementById('chat-messages');
+      if (box) box.scrollTop = box.scrollHeight;
+    }, 320);
+  } else {
+    // Ouvert → Mini
+    chatOuvert = false;
+    panel.classList.remove('ouvert');
+    panel.classList.add('mini');
+    if (arrow) arrow.style.transform = 'rotate(0deg)';
+  }
+}
+
+function ouvrirChatMini() {
+  const panel = document.getElementById('chat-panel');
+  panel.classList.add('mini');
+  panel.classList.remove('ouvert');
+  chatOuvert = false;
+  const arrow = document.getElementById('chat-arrow');
+  if (arrow) arrow.style.transform = 'rotate(0deg)';
+}
+
+function fermerChat() {
+  chatOuvert = false;
+  if (voixActif) desactiverVoix();
+  const panel = document.getElementById('chat-panel');
+  if (panel) panel.classList.remove('ouvert');
+  if (chatListener && chatCode) {
+    const chatRef = ref(db, 'salons/' + chatCode + '/chat');
+    off(chatRef, 'child_added', chatListener);
+    chatListener = null;
+  }
+  document.getElementById('chat-wrap').style.display = 'none';
+  chatCode = null;
+}
+
+async function envoyerMsgSysteme(texte) {
+  if (!chatCode) return;
+  try {
+    const chatRef = ref(db, 'salons/' + chatCode + '/chat');
+    await set(push(chatRef), { uid: 'systeme', pseudo: '', texte, ts: Date.now(), type: 'systeme' });
+  } catch(e) {}
+}
 
 // ══════════════ SCANNER QR CODE ══════════════
 let scannerStream = null;
@@ -1391,7 +2093,7 @@ function initApp() {
     demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer,
-    copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner
+    allerSolo,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix
   });
 }
 
@@ -1420,7 +2122,7 @@ function chargerLocal() {
 function allerEcran(id) { document.querySelectorAll('.ecran').forEach(e=>e.classList.remove('actif')); document.getElementById(id).classList.add('actif'); window.scrollTo(0,0); }
 function allerProfil() { document.getElementById('p-pseudo').value=J.pseudo||''; document.getElementById('p-idx').textContent=J.indices||0; majApProfil(); rafPieces(); bEmo(); bBib(); allerEcran('e-profil'); }
 function allerBoutique() { rafPieces(); rendreBoutique(); allerEcran('e-bout'); }
-function retourMenu() { nettLis(); salonData=null; estHote=false; stopTimer(); arreterScanner(); rafAcc(); allerEcran('e-acc'); }
+function retourMenu() { nettLis(); salonData=null; estHote=false; stopTimer(); arreterScanner(); fermerChat(); rafAcc(); allerEcran('e-acc'); }
 
 // ══════════════ PROFIL ══════════════
 function bEmo() {
@@ -1535,6 +2237,7 @@ async function rejoindre() {
     await update(ref(db,`salons/${code}/joueurs/${J.uid}`),jData);
     ecouter(code); ouvrirSalon(code);
     notif('Salon rejoint !','s');
+  setTimeout(()=>envoyerMsgSysteme(J.pseudo+' a rejoint le salon !'),500);
   } catch(e){notif('Erreur: '+e.message,'e');console.error(e);}
   btn.disabled=false; btn.innerHTML='<span class="ic" style="margin-right:7px"><svg width="18" height="18"><use href="#ic-rocket"/></svg></span>REJOINDRE';
 }
@@ -1597,6 +2300,8 @@ function ouvrirSalon(code) {
   document.getElementById('aff-code').textContent=code;
   // Reset QR box
   const qb=document.getElementById('qr-box'); if(qb) qb.style.display='none';
+  // Ouvrir le chat
+  initChat(code);
   document.getElementById('reg-hote').style.display=estHote?'block':'none';
   document.getElementById('ctrl-h').style.display=estHote?'block':'none';
   document.getElementById('att-inv').style.display=estHote?'none':'block';
@@ -1614,6 +2319,7 @@ function majListeJ(joueurs) {
   document.getElementById('nb-j').textContent=Object.keys(joueurs).length;
 }
 async function quitterSalon() {
+  fermerChat();
   if(salonData) {
     try {
       await update(ref(db,`salons/${salonData.code}/joueurs/${J.uid}`),{connecte:false});
@@ -1625,6 +2331,7 @@ async function quitterSalon() {
 
 // ══════════════ LANCER PARTIE ══════════════
 async function lancerPartie() {
+  // Chat reste visible pendant la partie
   if(!salonData) return;
   const tours=parseInt(document.getElementById('sel-tours')?.value||10);
   const lettres=randLettres(tours);
