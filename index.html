@@ -314,6 +314,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 .chat-panel.mini .chat-messages,
 .chat-panel.mini .chat-input-row,
 .chat-panel.mini .voice-bar{ display:none; }
+
+/* Espace en bas pour ne pas cacher les boutons derrière la barre chat mini */
+.app-has-chat{padding-bottom:56px !important;}
+#ecran-jeu.app-has-chat{padding-bottom:56px !important;}
+.ecran.app-has-chat{padding-bottom:56px !important;}
 .chat-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 16px 10px;
@@ -381,6 +386,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
   background:var(--cyan);border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
+}
+.chat-audio-btn-rec{
+  background:var(--rose) !important;
+  border-color:var(--rose) !important;
+  animation:recPulse 1s ease-in-out infinite;
+}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(139,58,15,.4)}50%{box-shadow:0 0 0 8px rgba(139,58,15,0)}}
+.rec-bar-item{
+  width:3px;border-radius:2px;background:var(--rose);
+  animation:recBar 0.5s ease-in-out infinite alternate;
 }
 
 /* ═══ LOADER DAVIESLAY ═══ */
@@ -796,10 +811,33 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div class="chat-msg systeme"><div class="chat-msg-bulle">Bienvenue dans le chat !</div></div>
     </div>
     <div class="chat-input-row">
+      <!-- Bouton micro audio message -->
+      <button id="chat-audio-btn" onclick="toggleAudioMsg()"
+        style="width:42px;height:42px;border-radius:50%;background:var(--bg);border:1.5px solid var(--bord);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;"
+        title="Message vocal">
+        <span class="ic" id="chat-audio-icon"><svg width="18" height="18"><use href="#ic-mic"/></svg></span>
+      </button>
       <input class="chat-input" id="chat-input" type="text" placeholder="Écrire un message..." maxlength="200"
         onkeydown="if(event.key==='Enter')envoyerMessage()">
       <button class="chat-send" onclick="envoyerMessage()">
         <span class="ic" style="color:#fff;"><svg width="18" height="18"><use href="#ic-send"/></svg></span>
+      </button>
+    </div>
+    <!-- Barre d'enregistrement audio (cachée par défaut) -->
+    <div id="chat-rec-bar" style="display:none;padding:8px 14px;background:var(--bg);border-top:1px solid var(--bord);align-items:center;gap:10px;flex-shrink:0;">
+      <div id="chat-rec-wave" style="flex:1;display:flex;align-items:center;gap:3px;height:32px;">
+        <span style="font-size:.72rem;color:var(--rose);font-family:monospace;" id="chat-rec-timer">0:00</span>
+        <div id="chat-rec-bars" style="display:flex;align-items:center;gap:2px;flex:1;">
+          <!-- barres animées générées en JS -->
+        </div>
+      </div>
+      <button onclick="annulerAudioMsg()"
+        style="padding:6px 12px;border-radius:20px;border:1px solid var(--bord);background:none;color:var(--muet);font-size:.72rem;cursor:pointer;">
+        Annuler
+      </button>
+      <button onclick="envoyerAudioMsg()"
+        style="padding:6px 14px;border-radius:20px;border:none;background:var(--rose);color:#fff;font-size:.72rem;cursor:pointer;font-family:'Orbitron',monospace;">
+        ENVOYER
       </button>
     </div>
   </div>
@@ -1822,6 +1860,119 @@ function jouerAudioDistant(uid, pseudo, stream) {
   } catch(e) { console.warn('[RTC] analyser:', e); }
 }
 
+// ══════════════ AUDIO MESSAGES (enregistrement vocal) ══════════════
+let audioMsgRec = null;
+let audioMsgChunks = [];
+let audioMsgTimer = null;
+let audioMsgSecondes = 0;
+let audioMsgActif = false;
+
+function toggleAudioMsg() {
+  if (!audioMsgActif) {
+    demarrerAudioMsg();
+  } else {
+    envoyerAudioMsg();
+  }
+}
+
+async function demarrerAudioMsg() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    notif('Micro non supporté.', 'e'); return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    audioMsgChunks = [];
+    audioMsgRec = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
+    audioMsgRec.ondataavailable = e => { if (e.data.size > 0) audioMsgChunks.push(e.data); };
+    audioMsgRec.start(100);
+    audioMsgActif = true;
+
+    // UI
+    document.getElementById('chat-input').style.display = 'none';
+    document.getElementById('chat-send').style.display = 'none';
+    document.getElementById('chat-rec-bar').style.display = 'flex';
+    const btn = document.getElementById('chat-audio-btn');
+    btn.classList.add('chat-audio-btn-rec');
+    document.getElementById('chat-audio-icon').innerHTML = '<svg width="18" height="18"><use href="#ic-stop"/></svg>';
+
+    // Timer + barres animées
+    audioMsgSecondes = 0;
+    const barsBox = document.getElementById('chat-rec-bars');
+    barsBox.innerHTML = Array.from({length:16}, (_, i) =>
+      '<div class="rec-bar-item" style="height:' + (8 + Math.random()*16) + 'px;animation-delay:' + (i*0.06) + 's"></div>'
+    ).join('');
+    audioMsgTimer = setInterval(() => {
+      audioMsgSecondes++;
+      const m = Math.floor(audioMsgSecondes / 60);
+      const s = audioMsgSecondes % 60;
+      document.getElementById('chat-rec-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      // Limite 60s
+      if (audioMsgSecondes >= 60) envoyerAudioMsg();
+    }, 1000);
+  } catch(e) {
+    notif('Erreur micro : ' + e.name, 'e');
+  }
+}
+
+async function envoyerAudioMsg() {
+  if (!audioMsgRec || !audioMsgActif) return;
+  clearInterval(audioMsgTimer);
+  audioMsgRec.stop();
+  audioMsgRec.stream.getTracks().forEach(t => t.stop());
+  audioMsgActif = false;
+  reinitUIAudioMsg();
+
+  // Encoder en base64 et envoyer via Firebase
+  await new Promise(res => setTimeout(res, 200)); // laisser ondataavailable finir
+  if (audioMsgChunks.length === 0) return;
+  const blob = new Blob(audioMsgChunks, { type: audioMsgRec.mimeType || 'audio/webm' });
+
+  // Vérif taille (Firebase limite 10MB par nœud)
+  if (blob.size > 500000) { notif('Message trop long (max 30s).', 'e'); return; }
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const b64 = reader.result; // data:audio/webm;base64,...
+    const msg = {
+      uid: J.uid,
+      pseudo: J.pseudo || 'Joueur',
+      type: 'audio',
+      audio: b64,
+      duree: audioMsgSecondes,
+      ts: Date.now()
+    };
+    try {
+      const chatRef = ref(db, 'salons/' + chatCode + '/chat');
+      await set(push(chatRef), msg);
+    } catch(e) {
+      notif('Erreur envoi audio.', 'e');
+    }
+  };
+  reader.readAsDataURL(blob);
+}
+
+function annulerAudioMsg() {
+  if (audioMsgRec) {
+    clearInterval(audioMsgTimer);
+    audioMsgRec.stop();
+    audioMsgRec.stream.getTracks().forEach(t => t.stop());
+    audioMsgRec = null;
+    audioMsgChunks = [];
+  }
+  audioMsgActif = false;
+  reinitUIAudioMsg();
+}
+
+function reinitUIAudioMsg() {
+  document.getElementById('chat-input').style.display = '';
+  const sendBtn = document.getElementById('chat-send');
+  if(sendBtn) sendBtn.style.display = '';
+  document.getElementById('chat-rec-bar').style.display = 'none';
+  const btn = document.getElementById('chat-audio-btn');
+  if(btn) btn.classList.remove('chat-audio-btn-rec');
+  document.getElementById('chat-audio-icon').innerHTML = '<svg width="18" height="18"><use href="#ic-mic"/></svg>';
+}
+
 // ══════════════ CHAT TEMPS RÉEL ══════════════
 let chatOuvert = false;
 let chatListener = null;
@@ -1838,6 +1989,8 @@ function initChat(codeSalon) {
     '<div class="chat-msg systeme"><div class="chat-msg-bulle">Chat ouvert — Salon ' + codeSalon + '</div></div>';
   // Démarrer en mode mini (barre collée en bas)
   ouvrirChatMini();
+  // Ajouter padding sur l'app entière pour que les boutons ne soient pas cachés
+  document.querySelectorAll('.ecran, .app, #ecran-jeu').forEach(el => el.classList.add('app-has-chat'));
 
   // Écouter les nouveaux messages en temps réel
   const chatRef = ref(db, 'salons/' + codeSalon + '/chat');
@@ -1867,6 +2020,7 @@ function afficherMessage(msg) {
   if (!box) return;
   const estMoi = msg.uid === J.uid;
   const estSys = msg.type === 'systeme';
+  const estAudio = msg.type === 'audio';
   const div = document.createElement('div');
   div.className = 'chat-msg ' + (estSys ? 'systeme' : estMoi ? 'moi' : 'autre');
 
@@ -1879,11 +2033,29 @@ function afficherMessage(msg) {
 
   const bulle = document.createElement('div');
   bulle.className = 'chat-msg-bulle';
-  bulle.textContent = msg.texte;
-  div.appendChild(bulle);
 
+  if (estAudio && msg.audio) {
+    // Bulle audio avec player intégré
+    bulle.style.cssText = 'padding:8px 10px;min-width:180px;';
+    const dur = msg.duree || 0;
+    const mm = Math.floor(dur/60), ss = dur%60;
+    bulle.innerHTML =
+      '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<button onclick="var a=this.nextElementSibling;a.paused?a.play():a.pause();this.textContent=a.paused?\'>\':(\'||\');" '
+      + 'style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.2);cursor:pointer;font-size:.9rem;color:inherit;">&gt;</button>'
+      + '<audio src="' + msg.audio + '" style="display:none;" onended="this.previousElementSibling.textContent=\'>\'"></audio>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:.65rem;opacity:.7;">Message vocal · ' + mm + ':' + (ss<10?'0':'') + ss + '</div>'
+      + '<div style="height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:4px;">'
+      + '<div style="width:0%;height:100%;background:currentColor;border-radius:2px;transition:width .1s;" class="audio-progress"></div>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  } else {
+    bulle.textContent = msg.texte || '';
+  }
+  div.appendChild(bulle);
   box.appendChild(div);
-  // Scroll automatique vers le bas
   box.scrollTop = box.scrollHeight;
 }
 
@@ -1959,6 +2131,7 @@ function fermerChat() {
   }
   document.getElementById('chat-wrap').style.display = 'none';
   chatCode = null;
+  document.querySelectorAll('.ecran, .app, #ecran-jeu').forEach(el => el.classList.remove('app-has-chat'));
 }
 
 async function envoyerMsgSysteme(texte) {
@@ -2245,7 +2418,7 @@ function initApp() {
     demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer,
-    allerSolo,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix
+    allerSolo,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix,toggleAudioMsg,annulerAudioMsg,envoyerAudioMsg
   });
 }
 
@@ -3588,7 +3761,10 @@ function finirSolo() {
   const vDiv = document.getElementById('sf-vies');
   if (soloEtat.mode === 'survie') {
     vDiv.style.display='block';
-    document.getElementById('sf-vies-aff').innerHTML = Array.from({length:3},(_,i)=>`<span class='vie${i>=soloEtat.vies?' perdu':''}'><span class='ic' style='color:var(--rose)'><svg width='20' height='20'><use href='#ic-heart'/></svg></span></span>`).join('');
+    document.getElementById('sf-vies-aff').innerHTML = Array.from({length:3}, function(_,i) {
+      var cls = i >= soloEtat.vies ? ' perdu' : '';
+      return '<span class="vie' + cls + '"><span class="ic" style="color:var(--rose)"><svg width="20" height="20"><use href="#ic-heart"/></svg></span></span>';
+    }).join('');
   } else vDiv.style.display='none';
   // Détail tours avec erreurs dépliables
   const cats = soloEtat.mode === 'categorie'
