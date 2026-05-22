@@ -394,8 +394,30 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 }
 @keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(139,58,15,.4)}50%{box-shadow:0 0 0 8px rgba(139,58,15,0)}}
 .rec-bar-item{
-  width:3px;border-radius:2px;background:var(--rose);
+  width:3px;border-radius:3px;background:var(--rose);
   animation:recBar 0.5s ease-in-out infinite alternate;
+  transition:height .1s ease;
+}
+@keyframes recBar{0%{transform:scaleY(.3)}100%{transform:scaleY(1)}}
+/* Avatar cercle dans les bulles audio */
+.chat-audio-avatar{
+  width:34px;height:34px;border-radius:50%;
+  object-fit:cover;flex-shrink:0;
+  background:var(--bg);border:2px solid rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;color:var(--muet);overflow:hidden;
+}
+.chat-audio-avatar img{width:100%;height:100%;object-fit:cover;}
+/* Barre d'ondes sonores pleine largeur */
+.wave-bars{
+  display:flex;align-items:center;gap:2px;
+  flex:1;height:28px;overflow:hidden;
+}
+.wave-bar{
+  flex:1;border-radius:2px;
+  background:rgba(255,255,255,.35);
+  min-width:2px;
+  transition:height .08s ease;
 }
 
 /* ═══ LOADER DAVIESLAY ═══ */
@@ -824,21 +846,29 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       </button>
     </div>
     <!-- Barre d'enregistrement audio (cachée par défaut) -->
-    <div id="chat-rec-bar" style="display:none;padding:8px 14px;background:var(--bg);border-top:1px solid var(--bord);align-items:center;gap:10px;flex-shrink:0;">
-      <div id="chat-rec-wave" style="flex:1;display:flex;align-items:center;gap:3px;height:32px;">
-        <span style="font-size:.72rem;color:var(--rose);font-family:monospace;" id="chat-rec-timer">0:00</span>
-        <div id="chat-rec-bars" style="display:flex;align-items:center;gap:2px;flex:1;">
-          <!-- barres animées générées en JS -->
+    <div id="chat-rec-bar" style="display:none;flex-direction:column;background:var(--bg);border-top:1px solid var(--bord);flex-shrink:0;">
+      <!-- Ligne ondes pleine largeur -->
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px 4px;">
+        <!-- Icone micro pulsant -->
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:recPulse 1s ease-in-out infinite;">
+          <svg width="14" height="14" style="color:#fff;"><use href="#ic-mic"/></svg>
         </div>
+        <!-- Barres d'ondes pleine largeur -->
+        <div id="chat-rec-bars" class="wave-bars"></div>
+        <!-- Timer -->
+        <span style="font-size:.72rem;color:var(--rose);font-family:monospace;flex-shrink:0;" id="chat-rec-timer">0:00</span>
       </div>
-      <button onclick="annulerAudioMsg()"
-        style="padding:6px 12px;border-radius:20px;border:1px solid var(--bord);background:none;color:var(--muet);font-size:.72rem;cursor:pointer;">
-        Annuler
-      </button>
-      <button onclick="envoyerAudioMsg()"
-        style="padding:6px 14px;border-radius:20px;border:none;background:var(--rose);color:#fff;font-size:.72rem;cursor:pointer;font-family:'Orbitron',monospace;">
-        ENVOYER
-      </button>
+      <!-- Ligne boutons -->
+      <div style="display:flex;gap:8px;padding:4px 14px 10px;">
+        <button onclick="annulerAudioMsg()"
+          style="flex:1;padding:8px;border-radius:20px;border:1px solid var(--bord);background:none;color:var(--muet);font-size:.72rem;cursor:pointer;">
+          Annuler
+        </button>
+        <button onclick="envoyerAudioMsg()"
+          style="flex:1;padding:8px;border-radius:20px;border:none;background:var(--rose);color:#fff;font-size:.72rem;cursor:pointer;font-family:'Orbitron',monospace;font-weight:700;">
+          ENVOYER
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -1895,20 +1925,61 @@ async function demarrerAudioMsg() {
     btn.classList.add('chat-audio-btn-rec');
     document.getElementById('chat-audio-icon').innerHTML = '<svg width="18" height="18"><use href="#ic-stop"/></svg>';
 
-    // Timer + barres animées
+    // Barres d'ondes réactives via AnalyserNode
     audioMsgSecondes = 0;
     const barsBox = document.getElementById('chat-rec-bars');
-    barsBox.innerHTML = Array.from({length:16}, (_, i) =>
-      '<div class="rec-bar-item" style="height:' + (8 + Math.random()*16) + 'px;animation-delay:' + (i*0.06) + 's"></div>'
-    ).join('');
-    audioMsgTimer = setInterval(() => {
+    const NB_BARS = 40;
+    barsBox.innerHTML = Array.from({length: NB_BARS}, function() {
+      return '<div class="wave-bar" style="height:4px;"></div>';
+    }).join('');
+    const barEls = barsBox.querySelectorAll('.wave-bar');
+
+    // Connecter l'analyser au micro
+    let analyserCtx = null, analyserNode = null, analyserBuf = null, animFrame = null;
+    try {
+      analyserCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = analyserCtx.createMediaStreamSource(stream);
+      analyserNode = analyserCtx.createAnalyser();
+      analyserNode.fftSize = 128;
+      analyserBuf = new Uint8Array(analyserNode.frequencyBinCount);
+      src.connect(analyserNode);
+
+      function dessinerOndes() {
+        if (!audioMsgActif) return;
+        animFrame = requestAnimationFrame(dessinerOndes);
+        analyserNode.getByteFrequencyData(analyserBuf);
+        const step = Math.floor(analyserBuf.length / NB_BARS);
+        barEls.forEach(function(bar, i) {
+          const val = analyserBuf[i * step] || 0;
+          const h = Math.max(3, Math.round((val / 255) * 26));
+          bar.style.height = h + 'px';
+          bar.style.opacity = 0.4 + (val / 255) * 0.6;
+        });
+      }
+      dessinerOndes();
+    } catch(e) {
+      // Fallback: animation CSS aléatoire
+      barsBox.innerHTML = Array.from({length: NB_BARS}, function(_, i) {
+        return '<div class="rec-bar-item" style="height:' + (6 + Math.random()*18) + 'px;animation-delay:' + (i*0.04) + 's;flex:1;"></div>';
+      }).join('');
+    }
+
+    // Timer 1s
+    audioMsgTimer = setInterval(function() {
       audioMsgSecondes++;
       const m = Math.floor(audioMsgSecondes / 60);
       const s = audioMsgSecondes % 60;
-      document.getElementById('chat-rec-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-      // Limite 60s
+      const timerEl = document.getElementById('chat-rec-timer');
+      if (timerEl) timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
       if (audioMsgSecondes >= 60) envoyerAudioMsg();
     }, 1000);
+
+    // Nettoyer l'analyser quand on arrête
+    window._audioMsgCleanup = function() {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      if (analyserCtx) analyserCtx.close().catch(function() {});
+      analyserCtx = null; analyserNode = null;
+    };
   } catch(e) {
     notif('Erreur micro : ' + e.name, 'e');
   }
@@ -1920,6 +1991,7 @@ async function envoyerAudioMsg() {
   audioMsgRec.stop();
   audioMsgRec.stream.getTracks().forEach(t => t.stop());
   audioMsgActif = false;
+  if (window._audioMsgCleanup) { window._audioMsgCleanup(); window._audioMsgCleanup = null; }
   reinitUIAudioMsg();
 
   // Encoder en base64 et envoyer via Firebase
@@ -1936,6 +2008,7 @@ async function envoyerAudioMsg() {
     const msg = {
       uid: J.uid,
       pseudo: J.pseudo || 'Joueur',
+      avatarImg: J.avatarImg || null,
       type: 'audio',
       audio: b64,
       duree: audioMsgSecondes,
@@ -2035,22 +2108,59 @@ function afficherMessage(msg) {
   bulle.className = 'chat-msg-bulle';
 
   if (estAudio && msg.audio) {
-    // Bulle audio avec player intégré
-    bulle.style.cssText = 'padding:8px 10px;min-width:180px;';
-    const dur = msg.duree || 0;
-    const mm = Math.floor(dur/60), ss = dur%60;
-    bulle.innerHTML =
-      '<div style="display:flex;align-items:center;gap:8px;">'
-      + '<button onclick="var a=this.nextElementSibling;a.paused?a.play():a.pause();this.textContent=a.paused?\'>\':(\'||\');" '
-      + 'style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.2);cursor:pointer;font-size:.9rem;color:inherit;">&gt;</button>'
-      + '<audio src="' + msg.audio + '" style="display:none;" onended="this.previousElementSibling.textContent=\'>\'"></audio>'
-      + '<div style="flex:1;">'
-      + '<div style="font-size:.65rem;opacity:.7;">Message vocal · ' + mm + ':' + (ss<10?'0':'') + ss + '</div>'
-      + '<div style="height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:4px;">'
-      + '<div style="width:0%;height:100%;background:currentColor;border-radius:2px;transition:width .1s;" class="audio-progress"></div>'
-      + '</div>'
-      + '</div>'
-      + '</div>';
+    bulle.style.cssText = 'padding:8px 10px;min-width:200px;max-width:280px;';
+    var dur = msg.duree || 0;
+    var mm2 = Math.floor(dur/60), ss2 = dur%60;
+    var durTxt = mm2 + ':' + (ss2<10?'0':'') + ss2;
+    // Wrapper principal
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    // Avatar
+    var av = document.createElement('div');
+    av.className = 'chat-audio-avatar';
+    if (msg.avatarImg) {
+      var avImg = document.createElement('img');
+      avImg.src = msg.avatarImg;
+      avImg.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+      av.appendChild(avImg);
+    } else {
+      av.textContent = (msg.pseudo||'?')[0].toUpperCase();
+    }
+    wrap.appendChild(av);
+    // Bouton play
+    var uid_a = 'aud' + Date.now().toString(36) + Math.floor(Math.random()*999);
+    var playBtn = document.createElement('button');
+    playBtn.textContent = '>';
+    playBtn.style.cssText = 'width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.25);cursor:pointer;font-size:.9rem;color:inherit;flex-shrink:0;';
+    // Audio element
+    var audioEl = document.createElement('audio');
+    audioEl.src = msg.audio;
+    audioEl.style.display = 'none';
+    playBtn.addEventListener('click', function() {
+      if (audioEl.paused) { audioEl.play(); playBtn.textContent = '||'; }
+      else { audioEl.pause(); playBtn.textContent = '>'; }
+    });
+    audioEl.addEventListener('ended', function() { playBtn.textContent = '>'; });
+    wrap.appendChild(playBtn);
+    wrap.appendChild(audioEl);
+    // Ondes + durée
+    var infoDiv = document.createElement('div');
+    infoDiv.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px;';
+    var waveDiv = document.createElement('div');
+    waveDiv.style.cssText = 'display:flex;align-items:center;gap:2px;height:22px;';
+    for (var wi=0; wi<28; wi++) {
+      var bar = document.createElement('div');
+      var bh = 3 + Math.round(Math.abs(Math.sin(wi*0.7))*18);
+      bar.style.cssText = 'flex:1;border-radius:2px;background:rgba(255,255,255,.4);height:'+bh+'px;min-width:2px;';
+      waveDiv.appendChild(bar);
+    }
+    var durDiv = document.createElement('div');
+    durDiv.style.cssText = 'font-size:.6rem;opacity:.6;';
+    durDiv.textContent = durTxt;
+    infoDiv.appendChild(waveDiv);
+    infoDiv.appendChild(durDiv);
+    wrap.appendChild(infoDiv);
+    bulle.appendChild(wrap);
   } else {
     bulle.textContent = msg.texte || '';
   }
