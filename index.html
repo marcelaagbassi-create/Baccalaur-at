@@ -222,7 +222,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 #e-msg-conv.actif{display:flex!important;align-items:stretch;}
 #e-msg-appel.actif{display:flex!important;align-items:center;justify-content:center;}
 /* App container */
-.msg-app{display:flex;flex-direction:column;width:100%;height:100%;}
+.msg-app{display:flex;flex-direction:column;width:100%;height:100%;position:relative;}
 /* Topbar */
 .msg-topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--carte);border-bottom:1.5px solid var(--bord);flex-shrink:0;min-height:58px;}
 .msg-topbar-back{width:36px;height:36px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--cyan);flex-shrink:0;}
@@ -1201,8 +1201,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
         <div class="msg-topbar-sub" id="msg-liste-sub">Chargement...</div>
       </div>
       <div class="msg-topbar-actions">
-        <button class="msg-topbar-btn" onclick="msgOuvrirNouveauContact()" title="Nouveau message">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <button class="msg-topbar-btn" onclick="msgOuvrirNouveauContact()" title="Nouvelle conversation" style="background:linear-gradient(135deg,#1A8A84,var(--cyan));color:#fff;border:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
     </div>
@@ -1219,6 +1219,10 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     <div class="msg-liste" id="msg-liste">
       <div style="padding:40px 20px;text-align:center;color:var(--muet);font-size:.8rem;">Chargement des conversations...</div>
     </div>
+    <!-- Bouton flottant Créer -->
+    <button onclick="msgOuvrirNouveauContact()" style="position:absolute;bottom:24px;right:20px;z-index:10;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1A8A84,var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 18px rgba(78,205,196,.45);font-size:1.5rem;">
+      ✏️
+    </button>
   </div>
 </div>
 
@@ -1284,18 +1288,32 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 </div>
 
 <!-- ════════ MODAL NOUVEAU CONTACT ════════ -->
-<div class="msg-modal" id="msg-modal-contact">
+<div class="msg-modal" id="msg-modal-contact" onclick="if(event.target===this)msgFermerModal()">
   <div class="msg-modal-box">
-    <div style="font-family:Orbitron,monospace;font-size:.85rem;margin-bottom:16px;color:var(--or);">NOUVEAU MESSAGE</div>
-    <div style="font-size:.78rem;color:var(--muet);margin-bottom:10px;">Entre le numéro de téléphone :</div>
-    <input class="champ" id="msg-new-tel" type="tel" placeholder="+224 xxx xxx xxx" style="margin-bottom:12px;">
-    <button class="btn btn-cyan" onclick="msgChercherContact()">RECHERCHER</button>
-    <div id="msg-new-result" style="margin-top:12px;"></div>
-    <button class="btn btn-fantome mt2" onclick="msgFermerModal()">ANNULER</button>
-    <div style="margin-top:16px;border-top:1px solid var(--bord);padding-top:12px;">
-      <div style="font-family:Orbitron,monospace;font-size:.75rem;margin-bottom:10px;color:var(--or);">CRÉER UN GROUPE</div>
-      <input class="champ" id="msg-grp-nom" type="text" placeholder="Nom du groupe..." maxlength="30" style="margin-bottom:8px;">
-      <button class="btn btn-or" onclick="msgCreerGroupe()">CRÉER LE GROUPE</button>
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-family:Orbitron,monospace;font-size:.85rem;color:var(--or);">✏️ NOUVELLE CONVERSATION</div>
+      <button onclick="msgFermerModal()" style="background:none;border:none;color:var(--muet);font-size:1.2rem;cursor:pointer;padding:4px;">✕</button>
+    </div>
+
+    <!-- Section Privé -->
+    <div style="background:var(--bg);border-radius:14px;padding:14px;margin-bottom:14px;border:1px solid var(--bord);">
+      <div style="font-family:Orbitron,monospace;font-size:.68rem;color:var(--cyan);margin-bottom:10px;letter-spacing:1px;">💬 MESSAGE PRIVÉ</div>
+      <div style="font-size:.72rem;color:var(--muet);margin-bottom:8px;">Entrer le numéro de téléphone :</div>
+      <input class="champ" id="msg-new-tel" type="tel" placeholder="+224 xxx xxx xxx" style="margin-bottom:10px;">
+      <button class="btn btn-cyan" onclick="msgChercherContact()" style="width:100%;padding:10px;">
+        🔍 RECHERCHER
+      </button>
+      <div id="msg-new-result" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Section Groupe -->
+    <div style="background:var(--bg);border-radius:14px;padding:14px;border:1px solid var(--bord);">
+      <div style="font-family:Orbitron,monospace;font-size:.68rem;color:var(--or);margin-bottom:10px;letter-spacing:1px;">👥 CRÉER UN GROUPE</div>
+      <input class="champ" id="msg-grp-nom" type="text" placeholder="Nom du groupe..." maxlength="30" style="margin-bottom:10px;">
+      <button class="btn btn-or" onclick="msgCreerGroupe()" style="width:100%;padding:10px;">
+        ➕ CRÉER LE GROUPE
+      </button>
     </div>
   </div>
 </div>
@@ -2423,11 +2441,18 @@ function msgChargerListe() {
   var sub = document.getElementById('msg-liste-sub');
   var liste = document.getElementById('msg-liste');
   if (sub) sub.textContent = J.tel || 'Configure ton numéro';
+  if (!J.uid || !authReady) {
+    // Attendre auth sans bloquer l'UI
+    if (liste) liste.innerHTML = '<div style="padding:50px 20px;text-align:center;color:var(--muet);font-size:.82rem;">⏳ Connexion en cours...</div>';
+    setTimeout(msgChargerListe, 500);
+    return;
+  }
   if (liste) liste.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muet);">Chargement...</div>';
-  if (!J.uid || !authReady) { setTimeout(msgChargerListe, 800); return; }
+  // Détacher l'ancien listener si existant
+  if (msgListeners._listUnsub) { try { msgListeners._listUnsub(); } catch(e){} msgListeners._listUnsub = null; }
   var convRef = ref(db, 'msgs/' + J.uid);
-  if (msgListeners._liste) { off(convRef, 'value', msgListeners._liste); }
-  msgListeners._liste = onValue(convRef, function(snap) {
+  // onValue retourne une fonction d'unsubscribe
+  msgListeners._listUnsub = onValue(convRef, function(snap) {
     var data = snap.val() || {};
     var convs = [];
     Object.keys(data).forEach(function(cid) {
@@ -2438,10 +2463,12 @@ function msgChargerListe() {
     convs.sort(function(a,b){ return b.dernierts - a.dernierts; });
     msgToutes = convs;
     msgAfficherListe(convs);
-    // Total non lus badge accueil
+    // Badge non lus sur l'accueil
     var total = convs.reduce(function(s,c){ return s+(c.nonLu||0); }, 0);
     var b = document.getElementById('cg-badge-acc');
     if (b) { b.style.display = total>0?'flex':'none'; b.textContent = total>9?'9+':total; }
+  }, function(err) {
+    if (liste) liste.innerHTML = '<div style="padding:30px;text-align:center;color:var(--rose);font-size:.78rem;">⚠️ Erreur: ' + err.message + '</div>';
   });
 }
 
@@ -2455,9 +2482,10 @@ function msgAfficherListe(convs) {
   if (!liste) return;
   var filtered = convs.filter(function(c){ return c.type === msgOngletActif; });
   if (filtered.length === 0) {
-    liste.innerHTML = '<div style="padding:50px 20px;text-align:center;color:var(--muet);font-size:.82rem;">'
-      + (msgOngletActif==='prive' ? '💬 Aucune conversation<br><small>Utilise + pour démarrer</small>' : '👥 Aucun groupe<br><small>Crée un groupe avec +</small>')
-      + '</div>';
+    var txt = msgOngletActif==='prive'
+      ? '💬<br>Aucune conversation privée<br><small style="font-size:.72rem;">Appuie sur ✏️ pour démarrer</small>'
+      : '👥<br>Aucun groupe<br><small style="font-size:.72rem;">Appuie sur ✏️ pour créer un groupe</small>';
+    liste.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--muet);font-size:.85rem;line-height:2;">' + txt + '</div>';
     return;
   }
   liste.innerHTML = '';
@@ -2469,10 +2497,11 @@ function msgAfficherListe(convs) {
       : '<span>'+(c.nom[0]||'?').toUpperCase()+'</span>';
     var tempsAff = c.dernierts ? msgHeureRelative(c.dernierts) : '';
     var badge = c.nonLu > 0 ? '<span class="msg-item-badge">'+Math.min(c.nonLu,99)+'</span>' : '';
-    var preview = c.type==='audio' ? '🎤 Message vocal' : msgEsc(c.dernierMsg||'').substr(0,40);
+    var preview = c.dernierMsg === '🎤 Message vocal' ? '🎤 Message vocal' : msgEsc((c.dernierMsg||'').substring(0,45));
+    var typeIcon = c.type === 'groupe' ? '👥 ' : '';
     d.innerHTML = '<div class="msg-item-av">'+avHtml+'</div>'
       + '<div class="msg-item-info">'
-      + '<div class="msg-item-head"><span class="msg-item-name">'+msgEsc(c.nom)+'</span><span class="msg-item-time">'+tempsAff+'</span></div>'
+      + '<div class="msg-item-head"><span class="msg-item-name">'+typeIcon+msgEsc(c.nom)+'</span><span class="msg-item-time">'+tempsAff+'</span></div>'
       + '<div class="msg-item-preview">'+preview+'</div>'
       + '</div>' + badge;
     d.onclick = function(){ msgOuvrirConv(c); };
