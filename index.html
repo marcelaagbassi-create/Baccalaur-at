@@ -268,14 +268,26 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 .msg-b-pseudo{font-family:Orbitron,monospace;font-size:.58rem;font-weight:700;color:var(--or);margin-bottom:2px;}
 .msg-b-time{font-size:.52rem;opacity:.65;margin-top:3px;text-align:right;}
 .msg-b-time.moi{color:rgba(255,255,255,.8);}
-/* Bulle vocale */
-.msg-voice-bubble{display:flex;align-items:center;gap:8px;min-width:160px;}
-.msg-voice-play{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.msg-bwrap.autre .msg-voice-play{background:rgba(78,205,196,.2);}
-.msg-voice-wave{flex:1;height:28px;display:flex;align-items:center;gap:1px;}
-.msg-voice-bar{width:3px;background:rgba(255,255,255,.5);border-radius:2px;flex-shrink:0;}
-.msg-bwrap.autre .msg-voice-bar{background:rgba(78,205,196,.5);}
-.msg-voice-dur{font-size:.62rem;opacity:.75;flex-shrink:0;}
+/* Bulle vocale — style salon */
+.msg-voice-bubble{display:flex;align-items:center;gap:10px;min-width:200px;max-width:260px;}
+.msg-voice-play{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.22);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+.msg-voice-play:active{background:rgba(255,255,255,.35);}
+.msg-bwrap.autre .msg-voice-play{background:rgba(78,205,196,.18);}
+.msg-bwrap.autre .msg-voice-play:active{background:rgba(78,205,196,.32);}
+.msg-voice-right{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;}
+.msg-voice-progress{width:100%;height:28px;position:relative;cursor:pointer;}
+.msg-voice-track{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;height:3px;background:rgba(255,255,255,.2);border-radius:2px;}
+.msg-bwrap.autre .msg-voice-track{background:rgba(78,205,196,.2);}
+.msg-voice-fill{position:absolute;top:0;left:0;height:100%;background:rgba(255,255,255,.6);border-radius:2px;width:0%;transition:width .1s;}
+.msg-bwrap.autre .msg-voice-fill{background:rgba(78,205,196,.7);}
+.msg-voice-bars{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;gap:1.5px;}
+.msg-voice-bar{flex:1;border-radius:2px;background:rgba(255,255,255,.45);transition:background .2s;}
+.msg-voice-bar.played{background:rgba(255,255,255,.9);}
+.msg-bwrap.autre .msg-voice-bar{background:rgba(78,205,196,.35);}
+.msg-bwrap.autre .msg-voice-bar.played{background:rgba(78,205,196,.85);}
+.msg-voice-meta{display:flex;justify-content:space-between;align-items:center;}
+.msg-voice-dur{font-size:.6rem;opacity:.7;}
+.msg-voice-spd{font-size:.58rem;opacity:.6;cursor:pointer;padding:1px 5px;border-radius:6px;background:rgba(255,255,255,.12);border:none;color:inherit;}
 /* Barre saisie */
 .msg-input-bar{display:flex;align-items:flex-end;gap:8px;padding:8px 12px;background:var(--carte);border-top:1.5px solid var(--bord);flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom));}
 .msg-textarea{flex:1;background:rgba(255,255,255,.7);border:1.5px solid var(--bord);border-radius:22px;padding:9px 16px;color:var(--texte);font-family:'Rajdhani',sans-serif;font-size:.9rem;resize:none;outline:none;max-height:100px;min-height:40px;overflow-y:auto;line-height:1.4;transition:border-color .2s;}
@@ -434,7 +446,6 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
 /* ═══ MUSIQUE & VOIX ═══ */
 .music-btn{
-  position:fixed;top:12px;right:12px;z-index:900;
   width:38px;height:38px;border-radius:50%;
   background:rgba(200,150,12,.15);
   border:1.5px solid var(--bord);
@@ -443,6 +454,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 }
 .music-btn:active{transform:scale(.9);}
 .music-btn.mute{opacity:.4;}
+/* Bouton musique n'est plus flottant global */
+#music-main-btn{ display:none !important; }
+/* Menu conversation */
+.conv-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.84rem;color:var(--texte);border-bottom:1px solid rgba(200,169,110,.12);text-align:left;}
+.conv-menu-item:last-child{border-bottom:none;}
+.conv-menu-item:active{background:rgba(78,205,196,.08);}
 /* Voix panel */
 .voice-bar{
   display:flex;align-items:center;justify-content:space-between;
@@ -1039,7 +1056,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     <div class="carte mb4" id="reg-hote" style="display:none;">
       <div class="titre-carte"><span class="ic" style="margin-right:6px;"><svg width="16" height="16"><use href="#ic-sliders"/></svg></span>RÉGLAGES</div>
 
-      <!-- Mode de jeu -->
+      <!-- Musique de fond -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bord);margin-bottom:14px;">
+        <div>
+          <div style="font-size:.7rem;letter-spacing:2px;color:var(--muet);">MUSIQUE DE FOND</div>
+          <div style="font-size:.62rem;color:var(--muet);margin-top:2px;">Ambiance musicale du salon</div>
+        </div>
+        <button class="music-btn" id="music-toggle-btn" onclick="toggleMusique()" title="Musique" style="position:relative;top:auto;right:auto;width:40px;height:40px;">
+          <span class="ic" id="music-icon"><svg width="16" height="16"><use href="#ic-speaker"/></svg></span>
+        </button>
+      </div>
       <div style="margin-bottom:14px;">
         <label style="font-size:.7rem;letter-spacing:2px;color:var(--muet);margin-bottom:8px;display:block;">MODE DE JEU</label>
         <div style="display:flex;gap:8px;">
@@ -1111,9 +1137,6 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
         <span id="chat-badge-mini" style="display:none;background:var(--rose);color:#fff;border-radius:10px;padding:1px 6px;font-size:.6rem;margin-left:6px;"></span>
       </span>
       <div style="display:flex;align-items:center;gap:8px;" onclick="event.stopPropagation()">
-        <button class="music-btn" id="music-toggle-btn" onclick="toggleMusique()" title="Musique" style="position:relative;top:auto;right:auto;width:32px;height:32px;">
-          <span class="ic" id="music-icon"><svg width="14" height="14"><use href="#ic-speaker"/></svg></span>
-        </button>
         <!-- Flèche indiquant l'état -->
         <span id="chat-arrow" style="color:var(--muet);font-size:1rem;transition:transform .3s;">▲</span>
       </div>
@@ -1268,17 +1291,54 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
         <button class="msg-topbar-btn" onclick="msgLancerAppel()" id="conv-btn-appel" title="Appel vocal">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.89 9.11 19.79 19.79 0 01.82 .5 2 2 0 012.81 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 7.91a16 16 0 006 6l.91-.91a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
         </button>
+        <!-- Menu 3 points -->
+        <button class="msg-topbar-btn" onclick="msgToggleMenu()" id="conv-btn-menu" title="Options">
+          <svg width="4" height="18" viewBox="0 0 4 18" fill="currentColor">
+            <circle cx="2" cy="2" r="2"/><circle cx="2" cy="9" r="2"/><circle cx="2" cy="16" r="2"/>
+          </svg>
+        </button>
       </div>
+    </div>
+    <!-- Menu déroulant conversation -->
+    <div id="conv-menu" style="display:none;position:absolute;top:58px;right:8px;z-index:50;background:var(--carte);border:1.5px solid var(--bord);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);min-width:200px;overflow:hidden;">
+      <div id="conv-menu-membres" style="display:none;">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--bord);">
+          <div style="font-family:Orbitron,monospace;font-size:.65rem;color:var(--or);margin-bottom:8px;">AJOUTER UN MEMBRE</div>
+          <div style="display:flex;gap:6px;">
+            <input id="conv-add-tel" type="tel" placeholder="+224..." class="champ" style="flex:1;padding:7px 10px;font-size:.75rem;">
+            <button onclick="convAjouterMembre()" style="background:var(--cyan);border:none;border-radius:8px;padding:7px 10px;cursor:pointer;color:#fff;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <div id="conv-add-result" style="margin-top:6px;font-size:.7rem;"></div>
+        </div>
+      </div>
+      <button class="conv-menu-item" onclick="msgModifierNom()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Modifier le nom
+      </button>
+      <button class="conv-menu-item" onclick="msgPartagerConv()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Partager la conversation
+      </button>
+      <button class="conv-menu-item" onclick="msgSignalerConv()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Signaler
+      </button>
+      <button class="conv-menu-item" onclick="msgSupprimerConv()" style="color:var(--rose);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        Supprimer la conversation
+      </button>
     </div>
     <!-- Messages -->
     <div class="msg-messages" id="conv-messages">
-      <div class="msg-bwrap sys"><div class="msg-bubble">Début de la conversation 🔒</div></div>
+      <div class="msg-bwrap sys"><div class="msg-bubble">Début de la conversation</div></div>
     </div>
     <!-- Barre enregistrement -->
     <div class="msg-rec-bar" id="conv-rec-bar">
       <span class="msg-rec-timer" id="conv-rec-timer">0:00</span>
       <div class="msg-rec-waves" id="conv-rec-waves"></div>
-      <button class="msg-rec-cancel" onclick="msgAnnulerVoice()">✕ ANNULER</button>
+      <button class="msg-rec-cancel" onclick="msgAnnulerVoice()">ANNULER</button>
     </div>
     <!-- Barre saisie -->
     <div class="msg-input-bar">
@@ -1305,9 +1365,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div style="font-family:Orbitron,monospace;font-size:1rem;color:var(--cyan);margin-top:8px;" id="appel-timer">0:00</div>
     </div>
     <div class="appel-btns">
-      <button class="appel-btn appel-btn-mute" id="appel-btn-mute" onclick="msgApMute()">🎤</button>
-      <button class="appel-btn appel-btn-end" onclick="msgTerminerAppel()">📵</button>
-      <button class="appel-btn appel-btn-spk" id="appel-btn-spk" onclick="msgApSpk()">🔊</button>
+      <button class="appel-btn appel-btn-mute" id="appel-btn-mute" onclick="msgApMute()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg></button>
+      <button class="appel-btn appel-btn-end" onclick="msgTerminerAppel()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M10.68 13.31a16 16 0 003.41 2.6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7 2 2 0 011.72 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 1 1 0 01-.29-.21M2 2l20 20"/><path d="M16.6 16.6a19.5 19.5 0 01-9.11-9.11"/></svg></button>
+      <button class="appel-btn appel-btn-spk" id="appel-btn-spk" onclick="msgApSpk()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></button>
     </div>
   </div>
 </div>
@@ -2537,8 +2597,8 @@ function msgAfficherListe(convs) {
   var filtered = convs.filter(function(c){ return c.type === msgOngletActif; });
   if (filtered.length === 0) {
     var txt = msgOngletActif==='prive'
-      ? '💬<br>Aucune conversation privée<br><small style="font-size:.72rem;">Appuie sur ✏️ pour démarrer</small>'
-      : '👥<br>Aucun groupe<br><small style="font-size:.72rem;">Appuie sur ✏️ pour créer un groupe</small>';
+      ? 'Aucune conversation privée<br><small style="font-size:.72rem;">Appuie sur ✏️ pour démarrer</small>'
+      : 'Aucun groupe<br><small style="font-size:.72rem;">Appuie sur ✏️ pour créer un groupe</small>';
     liste.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--muet);font-size:.85rem;line-height:2;">' + txt + '</div>';
     return;
   }
@@ -2639,20 +2699,62 @@ function msgAfficherBulle(msg, scroll) {
     var av = msg.avatarImg ? '<img src="'+msg.avatarImg+'">' : '<span>'+(msg.pseudo||'?')[0].toUpperCase()+'</span>';
     var pseudoLine = (!estMoi && msgConvActuelle && msgConvActuelle.type==='groupe')
       ? '<div class="msg-b-pseudo">'+msgEsc(msg.pseudo||'')+'</div>' : '';
-    var dur = msg.duree ? Math.floor(msg.duree)+'s' : '';
-    // Générer barres simulées
-    var bars = Array.from({length:20},function(){ return '<div class="msg-voice-bar" style="height:'+Math.floor(4+Math.random()*20)+'px"></div>'; }).join('');
+    var totalDur = msg.duree ? Math.floor(msg.duree) : 0;
+    var durFmt = totalDur >= 60 ? Math.floor(totalDur/60)+':'+('0'+Math.floor(totalDur%60)).slice(-2) : '0:'+('0'+totalDur).slice(-2);
+    // Barres waveform (hauteurs pseudo-aléatoires déterministes)
+    var barHeights = Array.from({length:28}, function(_,i){ return 3+Math.abs(Math.sin(i*2.3+1.7)*19)|0; });
+    var barsHtml = barHeights.map(function(h){ return '<div class="msg-voice-bar" style="height:'+h+'px"></div>'; }).join('');
     wrap.innerHTML = '<div class="msg-bav">'+av+'</div>'
       + '<div><div class="msg-bubble">'
       + pseudoLine
       + '<div class="msg-voice-bubble">'
-      + '<button class="msg-voice-play">▶</button>'
-      + '<div class="msg-voice-wave">'+bars+'</div>'
-      + '<span class="msg-voice-dur">'+dur+'</span>'
+      + '<button class="msg-voice-play">'
+        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+      + '</button>'
+      + '<div class="msg-voice-right">'
+        + '<div class="msg-voice-progress">'
+          + '<div class="msg-voice-track"><div class="msg-voice-fill"></div></div>'
+          + '<div class="msg-voice-bars">'+barsHtml+'</div>'
+        + '</div>'
+        + '<div class="msg-voice-meta">'
+          + '<span class="msg-voice-dur">'+durFmt+'</span>'
+          + '<button class="msg-voice-spd">1x</button>'
+        + '</div>'
+      + '</div>'
       + '</div>'
       + '<div class="msg-b-time'+(estMoi?' moi':'')+'">'+hh+'</div>'
       + '</div></div>';
-    (function(b64,btn){ btn.onclick=function(){ msgJouerAudio(b64,btn); }; })(msg.audioData||'', wrap.querySelector('.msg-voice-play'));
+    // Logique audio interactive
+    (function(b64, container, totDur) {
+      var btn = container.querySelector('.msg-voice-play');
+      var fill = container.querySelector('.msg-voice-fill');
+      var durDisp = container.querySelector('.msg-voice-dur');
+      var prog = container.querySelector('.msg-voice-progress');
+      var barEls = Array.from(container.querySelectorAll('.msg-voice-bar'));
+      var spdBtn = container.querySelector('.msg-voice-spd');
+      var speeds = [1, 1.5, 2, 0.75]; var spdIdx = 0;
+      var audio = null; var raf = null;
+      if (spdBtn) spdBtn.onclick = function(e){ e.stopPropagation(); spdIdx=(spdIdx+1)%speeds.length; spdBtn.textContent=speeds[spdIdx]+'x'; if(audio) audio.playbackRate=speeds[spdIdx]; };
+      function tick() {
+        if (!audio || audio.paused) return;
+        var pct = audio.currentTime/(audio.duration||totDur||1);
+        if (fill) fill.style.width=(pct*100)+'%';
+        var pc=Math.floor(pct*barEls.length); barEls.forEach(function(b,i){b.classList.toggle('played',i<pc);});
+        var rem=Math.ceil((audio.duration||totDur)-audio.currentTime);
+        if (durDisp) durDisp.textContent='0:'+('0'+Math.min(rem,99)).slice(-2);
+        raf=requestAnimationFrame(tick);
+      }
+      function setPlay(){ btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; }
+      function setPause(){ btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>'; }
+      if (btn) btn.onclick = function(){
+        if (!audio) {
+          audio=new Audio(b64); audio.playbackRate=speeds[spdIdx]; audio.play(); setPlay(); raf=requestAnimationFrame(tick);
+          audio.onended=function(){ setPause(); if(fill) fill.style.width='0%'; barEls.forEach(function(b){b.classList.remove('played');}); if(durDisp) durDisp.textContent='0:'+('0'+(totDur||0)).slice(-2); cancelAnimationFrame(raf); audio=null; };
+        } else if(audio.paused){ audio.play(); setPlay(); raf=requestAnimationFrame(tick); }
+        else { audio.pause(); setPause(); cancelAnimationFrame(raf); }
+      };
+      if (prog) prog.onclick = function(e){ if(!audio) return; var r=prog.getBoundingClientRect(); audio.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*(audio.duration||totDur); };
+    })(msg.audioData||'', wrap, totalDur);
   } else {
     wrap.className = 'msg-bwrap ' + (estMoi?'moi':'autre');
     var av = msg.avatarImg ? '<img src="'+msg.avatarImg+'">' : '<span>'+(msg.pseudo||'?')[0].toUpperCase()+'</span>';
@@ -3029,6 +3131,81 @@ function grpAjouterMembre(m) {
   chip.appendChild(del);
   liste.appendChild(chip);
   notif(m.pseudo+' ajouté au groupe','s');
+}
+
+// ── Menu conversation (3 points) ──
+function msgToggleMenu() {
+  var menu = document.getElementById('conv-menu');
+  var membresSection = document.getElementById('conv-menu-membres');
+  if (!menu) return;
+  var isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  // Afficher section membres seulement pour les groupes
+  if (membresSection) membresSection.style.display = (msgConvActuelle && msgConvActuelle.type==='groupe') ? 'block' : 'none';
+  // Fermer si clic en dehors
+  if (!isOpen) {
+    setTimeout(function(){
+      document.addEventListener('click', function closeMenu(e) {
+        var m = document.getElementById('conv-menu');
+        var btn = document.getElementById('conv-btn-menu');
+        if (m && !m.contains(e.target) && e.target !== btn) { m.style.display='none'; document.removeEventListener('click', closeMenu); }
+      });
+    }, 50);
+  }
+}
+
+function msgModifierNom() {
+  document.getElementById('conv-menu').style.display='none';
+  if (!msgConvActuelle) return;
+  var nom = prompt('Nouveau nom :', msgConvActuelle.nom||'');
+  if (!nom || !nom.trim()) return;
+  nom = nom.trim();
+  msgConvActuelle.nom = nom;
+  var nomEl = document.getElementById('conv-nom'); if(nomEl) nomEl.textContent = nom.toUpperCase();
+  update(ref(db,'msgs/'+J.uid+'/'+msgConvActuelle.id), {nom:nom}).catch(function(){});
+  if (msgConvActuelle.autreUid) update(ref(db,'msgs/'+msgConvActuelle.autreUid+'/'+msgConvActuelle.id), {nom:nom}).catch(function(){});
+  notif('Nom modifié !','s');
+}
+
+function msgPartagerConv() {
+  document.getElementById('conv-menu').style.display='none';
+  if (!msgConvActuelle) return;
+  if (navigator.share) { navigator.share({ title:'Baccalauréat – '+msgConvActuelle.nom, text:'Rejoins moi sur Baccalauréat !' }); }
+  else { notif('Partage non supporté sur ce navigateur','i'); }
+}
+
+function msgSignalerConv() {
+  document.getElementById('conv-menu').style.display='none';
+  notif('Signalement envoyé. Merci.','s');
+}
+
+function msgSupprimerConv() {
+  document.getElementById('conv-menu').style.display='none';
+  if (!msgConvActuelle) return;
+  if (!confirm('Supprimer cette conversation ?')) return;
+  remove(ref(db,'msgs/'+J.uid+'/'+msgConvActuelle.id)).catch(function(){});
+  notif('Conversation supprimée','s');
+  msgRetourListe();
+}
+
+async function convAjouterMembre() {
+  if (!msgConvActuelle || msgConvActuelle.type!=='groupe') return;
+  var tel = (document.getElementById('conv-add-tel').value||'').trim();
+  if (!tel) { notif('Entre un numéro !','e'); return; }
+  var resEl = document.getElementById('conv-add-result');
+  if (resEl) resEl.innerHTML = 'Recherche...';
+  try {
+    var snap = await get(ref(db,'joueurs'));
+    var data = snap.val() || {};
+    var trouve = null;
+    Object.keys(data).forEach(function(uid){ if(data[uid].tel===tel && uid!==J.uid) trouve={uid:uid,...data[uid]}; });
+    if (!trouve) { if(resEl) resEl.innerHTML='<span style="color:var(--rose)">Aucun joueur trouvé</span>'; return; }
+    await update(ref(db,'msgs/'+trouve.uid+'/'+msgConvActuelle.id), { type:'groupe', nom:msgConvActuelle.nom, autreUid:null, avatar:msgConvActuelle.avatar||null, dernierMsg:J.pseudo+' vous a ajouté', dernierts:Date.now(), nonLu:1 }).catch(function(){});
+    await set(push(ref(db,'msgconv/'+msgConvActuelle.id+'/msgs')), { uid:J.uid, pseudo:J.pseudo, texte:J.pseudo+' a ajouté '+trouve.pseudo+' au groupe', ts:Date.now(), type:'systeme' }).catch(function(){});
+    if (resEl) resEl.innerHTML='<span style="color:var(--vert)">'+msgEsc(trouve.pseudo)+' ajouté !</span>';
+    document.getElementById('conv-add-tel').value='';
+    notif(trouve.pseudo+' ajouté au groupe','s');
+  } catch(e) { if(resEl) resEl.innerHTML='<span style="color:var(--rose)">Erreur</span>'; }
 }
 
 // ══════════════ LEADERBOARD ══════════════
@@ -4332,14 +4509,14 @@ function initApp() {
     demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer,
-    allerSolo,selModePartie,ajouterCatCustom,ongletProfil,effacerHistorique,copierCodeAmi,envoyerDemandeAmi,accepterAmi,refuserAmi,supprimerAmi,inviterAmiSalon,allerLeaderboard,lbOnglet,allerChatGlobal,cgOnglet,cgEnvoyer,cgAutoResize,cgMajCompteur,msgOnglet,msgFiltrer,msgOuvrirNouveauContact,msgFermerModal,msgChercherContact,msgDemarrerConv,msgCreerGroupe,msgRetourListe,msgEnvoyer,msgToggleVoice,msgAnnulerVoice,msgJouerAudio,msgLancerAppel,msgTerminerAppel,msgApMute,msgApSpk,mmodOnglet,grpRechercherMembre,grpPreviewPhoto,profilGaleriePhoto,retirerCatCustom,lancerMatchTournoi,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix,toggleAudioMsg,annulerAudioMsg,envoyerAudioMsg
+    allerSolo,selModePartie,ajouterCatCustom,ongletProfil,effacerHistorique,copierCodeAmi,envoyerDemandeAmi,accepterAmi,refuserAmi,supprimerAmi,inviterAmiSalon,allerLeaderboard,lbOnglet,allerChatGlobal,cgOnglet,cgEnvoyer,cgAutoResize,cgMajCompteur,msgOnglet,msgFiltrer,msgOuvrirNouveauContact,msgFermerModal,msgChercherContact,msgDemarrerConv,msgCreerGroupe,msgRetourListe,msgEnvoyer,msgToggleVoice,msgAnnulerVoice,msgJouerAudio,msgLancerAppel,msgTerminerAppel,msgApMute,msgApSpk,mmodOnglet,grpRechercherMembre,grpPreviewPhoto,profilGaleriePhoto,msgToggleMenu,msgModifierNom,msgPartagerConv,msgSignalerConv,msgSupprimerConv,convAjouterMembre,retirerCatCustom,lancerMatchTournoi,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix,toggleAudioMsg,annulerAudioMsg,envoyerAudioMsg
   });
 }
 
 window.addEventListener('load', () => {
   // Exposer immédiatement les fonctions de navigation (avant Firebase)
   // pour éviter "allerChatGlobal is not defined" si cliqué avant initApp
-  Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk, mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto });
+  Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk, mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto, msgToggleMenu, msgModifierNom, msgPartagerConv, msgSignalerConv, msgSupprimerConv, convAjouterMembre });
 
   // Attendre que l auth anonyme soit etablie avant de demarrer
   // Cela evite le PERMISSION_DENIED lors des premieres operations Firebase
