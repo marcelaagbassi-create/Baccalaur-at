@@ -903,6 +903,28 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       </div>
       <div id="p-titre" style="font-family:Orbitron,monospace;font-size:.67rem;color:var(--or);min-height:14px;letter-spacing:2px;"></div>
     </div>
+    <!-- Photo de profil depuis galerie -->
+    <div class="carte mb4">
+      <div class="titre-carte">📸 PHOTO DE PROFIL</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div id="p-av-preview" onclick="document.getElementById('p-photo-inp').click()" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--rose));display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;border:3px dashed rgba(200,169,110,.5);overflow:hidden;flex-shrink:0;position:relative;">
+          <span id="p-av-emoji">😊</span>
+          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:4px;">Choisir depuis la galerie</div>
+          <div style="font-size:.62rem;color:var(--muet);margin-bottom:8px;">JPG, PNG — max 2 Mo</div>
+          <button class="btn btn-fantome" onclick="document.getElementById('p-photo-inp').click()" style="padding:7px 14px;font-size:.65rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:5px;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            CHOISIR UNE PHOTO
+          </button>
+        </div>
+      </div>
+      <input type="file" id="p-photo-inp" accept="image/*" style="display:none;" onchange="profilGaleriePhoto(this)">
+    </div>
+
     <div class="carte mb4">
       <div class="titre-carte">PSEUDO</div>
       <input class="champ" id="p-pseudo" type="text" placeholder="Ton nom de guerrier..." maxlength="16">
@@ -1220,8 +1242,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
       <div style="padding:40px 20px;text-align:center;color:var(--muet);font-size:.8rem;">Chargement des conversations...</div>
     </div>
     <!-- Bouton flottant Créer -->
-    <button onclick="msgOuvrirNouveauContact()" style="position:absolute;bottom:24px;right:20px;z-index:10;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1A8A84,var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 18px rgba(78,205,196,.45);font-size:1.5rem;">
-      ✏️
+    <button onclick="msgOuvrirNouveauContact()" title="Nouvelle conversation" style="position:absolute;bottom:24px;right:20px;z-index:10;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1A8A84,var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 18px rgba(78,205,196,.45);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        <line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/>
+      </svg>
     </button>
   </div>
 </div>
@@ -1289,30 +1314,60 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
 <!-- ════════ MODAL NOUVEAU CONTACT ════════ -->
 <div class="msg-modal" id="msg-modal-contact" onclick="if(event.target===this)msgFermerModal()">
-  <div class="msg-modal-box">
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <div style="font-family:Orbitron,monospace;font-size:.85rem;color:var(--or);">✏️ NOUVELLE CONVERSATION</div>
-      <button onclick="msgFermerModal()" style="background:none;border:none;color:var(--muet);font-size:1.2rem;cursor:pointer;padding:4px;">✕</button>
+  <div class="msg-modal-box" style="max-height:88vh;overflow-y:auto;">
+    <!-- Header avec onglets -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-family:Orbitron,monospace;font-size:.82rem;color:var(--or);">NOUVELLE CONVERSATION</div>
+      <button onclick="msgFermerModal()" style="background:none;border:none;color:var(--muet);font-size:1.3rem;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(0,0,0,.1);">✕</button>
+    </div>
+    <!-- Onglets modal -->
+    <div style="display:flex;background:var(--bg);border-radius:12px;margin-bottom:14px;padding:3px;gap:3px;">
+      <button id="mmod-tab-prive" onclick="mmodOnglet('prive')" style="flex:1;padding:8px;border:none;border-radius:10px;background:linear-gradient(135deg,#1A8A84,var(--cyan));color:#fff;font-family:Orbitron,monospace;font-size:.6rem;cursor:pointer;">💬 PRIVÉ</button>
+      <button id="mmod-tab-groupe" onclick="mmodOnglet('groupe')" style="flex:1;padding:8px;border:none;border-radius:10px;background:none;color:var(--muet);font-family:Orbitron,monospace;font-size:.6rem;cursor:pointer;">👥 GROUPE</button>
     </div>
 
-    <!-- Section Privé -->
-    <div style="background:var(--bg);border-radius:14px;padding:14px;margin-bottom:14px;border:1px solid var(--bord);">
-      <div style="font-family:Orbitron,monospace;font-size:.68rem;color:var(--cyan);margin-bottom:10px;letter-spacing:1px;">💬 MESSAGE PRIVÉ</div>
-      <div style="font-size:.72rem;color:var(--muet);margin-bottom:8px;">Entrer le numéro de téléphone :</div>
-      <input class="champ" id="msg-new-tel" type="tel" placeholder="+224 xxx xxx xxx" style="margin-bottom:10px;">
-      <button class="btn btn-cyan" onclick="msgChercherContact()" style="width:100%;padding:10px;">
-        🔍 RECHERCHER
+    <!-- Panneau PRIVÉ -->
+    <div id="mmod-prive">
+      <div style="font-size:.72rem;color:var(--muet);margin-bottom:8px;">Numéro de téléphone :</div>
+      <input class="champ" id="msg-new-tel" type="tel" placeholder="+224 xxx xxx xxx" style="margin-bottom:10px;"
+        onkeydown="if(event.key==='Enter')msgChercherContact()">
+      <button class="btn btn-cyan" onclick="msgChercherContact()" style="width:100%;padding:10px;margin-bottom:4px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        RECHERCHER
       </button>
-      <div id="msg-new-result" style="margin-top:10px;"></div>
+      <div id="msg-new-result" style="margin-top:8px;"></div>
     </div>
 
-    <!-- Section Groupe -->
-    <div style="background:var(--bg);border-radius:14px;padding:14px;border:1px solid var(--bord);">
-      <div style="font-family:Orbitron,monospace;font-size:.68rem;color:var(--or);margin-bottom:10px;letter-spacing:1px;">👥 CRÉER UN GROUPE</div>
-      <input class="champ" id="msg-grp-nom" type="text" placeholder="Nom du groupe..." maxlength="30" style="margin-bottom:10px;">
+    <!-- Panneau GROUPE -->
+    <div id="mmod-groupe" style="display:none;">
+      <!-- Photo du groupe -->
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;">
+        <div id="grp-av-preview" onclick="document.getElementById('grp-photo-inp').click()" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--rose));display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;border:3px dashed rgba(200,169,110,.5);overflow:hidden;position:relative;">
+          👥
+          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+        </div>
+        <div style="font-size:.62rem;color:var(--muet);margin-top:6px;">Appuie pour choisir une photo</div>
+        <input type="file" id="grp-photo-inp" accept="image/*" style="display:none;" onchange="grpPreviewPhoto(this)">
+      </div>
+      <!-- Nom du groupe -->
+      <input class="champ" id="msg-grp-nom" type="text" placeholder="Nom du groupe..." maxlength="30" style="margin-bottom:12px;">
+      <!-- Ajouter membres par numéro -->
+      <div style="font-family:Orbitron,monospace;font-size:.65rem;color:var(--cyan);margin-bottom:8px;">AJOUTER DES MEMBRES</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input class="champ" id="grp-tel-inp" type="tel" placeholder="+224 xxx xxx xxx" style="flex:1;"
+          onkeydown="if(event.key==='Enter')grpRechercherMembre()">
+        <button class="btn btn-cyan" onclick="grpRechercherMembre()" style="padding:8px 12px;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </div>
+      <div id="grp-membre-result" style="margin-bottom:10px;"></div>
+      <!-- Liste membres sélectionnés -->
+      <div id="grp-membres-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:10px;"></div>
       <button class="btn btn-or" onclick="msgCreerGroupe()" style="width:100%;padding:10px;">
-        ➕ CRÉER LE GROUPE
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        CRÉER LE GROUPE
       </button>
     </div>
   </div>
@@ -1373,14 +1428,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
         </button>
       </div>
       <!-- Entrer code ami -->
-      <div style="display:flex;gap:8px;">
-        <input class="champ" id="inp-code-ami" placeholder="Code ami (4 lettres)" maxlength="6"
-          style="flex:1;text-transform:uppercase;font-family:Orbitron,monospace;letter-spacing:2px;"
-          oninput="this.value=this.value.toUpperCase()">
-        <button class="btn btn-cyan" onclick="envoyerDemandeAmi()" style="padding:8px 14px;flex-shrink:0;">
-          <span class="ic"><svg width="16" height="16"><use href="#ic-send"/></svg></span>
-        </button>
-      </div>
+      <input class="champ" id="inp-code-ami" placeholder="Code ami (ex: 4RW9DR)" maxlength="6"
+        style="text-transform:uppercase;font-family:Orbitron,monospace;letter-spacing:2px;margin-bottom:8px;"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')envoyerDemandeAmi()">
+      <button class="btn btn-cyan" onclick="envoyerDemandeAmi()" style="width:100%;padding:10px;">
+        <span class="ic" style="margin-right:8px;"><svg width="16" height="16"><use href="#ic-send"/></svg></span>ENVOYER LA DEMANDE
+      </button>
     </div>
 
     <!-- Demandes reçues -->
@@ -2696,13 +2750,30 @@ async function msgDemarrerConv(autreUid, autreNom, autreAv) {
 async function msgCreerGroupe() {
   var nom = (document.getElementById('msg-grp-nom').value||'').trim();
   if (!nom) { notif('Donne un nom au groupe !','e'); return; }
-  var gid = 'grp_'+Math.random().toString(36).substr(2,8);
-  await update(ref(db,'msgs/'+J.uid+'/'+gid), { type:'groupe', nom:nom, autreUid:null, avatar:null, dernierMsg:'Groupe créé', dernierts:Date.now(), nonLu:0 }).catch(function(){});
-  await set(push(ref(db,'msgconv/'+gid+'/msgs')), { uid:J.uid, pseudo:J.pseudo, texte:J.pseudo+' a créé le groupe "'+nom+'"', ts:Date.now(), type:'systeme' }).catch(function(){});
+  var avatar = window._grpPhotoB64 || null;
+  var membres = window._grpMembres || [];
+  var gid = 'grp_'+J.uid.substr(0,4)+'_'+Math.random().toString(36).substr(2,6);
+  // Enregistrer pour le créateur
+  await update(ref(db,'msgs/'+J.uid+'/'+gid), { type:'groupe', nom:nom, autreUid:null, avatar:avatar, dernierMsg:'Groupe créé', dernierts:Date.now(), nonLu:0 }).catch(function(){});
+  // Enregistrer pour chaque membre
+  for (var i=0; i<membres.length; i++) {
+    var m = membres[i];
+    await update(ref(db,'msgs/'+m.uid+'/'+gid), { type:'groupe', nom:nom, autreUid:null, avatar:avatar, dernierMsg:J.pseudo+' a créé le groupe', dernierts:Date.now(), nonLu:1 }).catch(function(){});
+  }
+  // Message système d'initialisation
+  var membresNoms = membres.map(function(m){ return m.pseudo; }).join(', ');
+  var texteInit = J.pseudo+' a créé le groupe "'+nom+'"'+(membres.length>0 ? ' avec '+membresNoms : '');
+  await set(push(ref(db,'msgconv/'+gid+'/msgs')), { uid:J.uid, pseudo:J.pseudo, texte:texteInit, ts:Date.now(), type:'systeme' }).catch(function(){});
+  // Réinitialiser
+  window._grpPhotoB64 = null;
+  window._grpMembres = [];
+  var ml = document.getElementById('grp-membres-list'); if(ml) ml.innerHTML='';
+  var gp = document.getElementById('grp-av-preview'); if(gp){ gp.style.backgroundImage=''; gp.innerHTML='👥<div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.5\"><path d=\"M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z\"/><circle cx=\"12\" cy=\"13\" r=\"4\"/></svg></div>'; }
   msgFermerModal();
-  notif('Groupe créé !','s');
-  var conv = { id:gid, type:'groupe', nom:nom, autreUid:null, avatar:null };
-  msgOuvrirConv(conv);
+  notif('Groupe "'+nom+'" créé avec '+(membres.length+1)+' membre(s) !','s');
+  document.getElementById('msg-grp-nom').value='';
+  var conv = { id:gid, type:'groupe', nom:nom, autreUid:null, avatar:avatar };
+  setTimeout(function(){ msgOuvrirConv(conv); }, 300);
 }
 
 // ── Lire un message vocal ──
@@ -2828,6 +2899,137 @@ var cgCanalActif='general', cgListeners={}, cgDernierMsgKey={}, cgNonLus={genera
 var cgCanaux={general:{nom:'GÉNÉRAL',desc:'Discussion générale',emoji:'💬',placeholder:'Message...'},jeu:{nom:'STRATÉGIE',desc:'Stratégies',emoji:'🎯',placeholder:'Stratégie...'},off:{nom:'OFF-TOPIC',desc:'Discussion libre',emoji:'🎲',placeholder:'Message...'}};
 function cgOnglet(c){} function cgEnvoyer(){} function cgAutoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';} function cgMajCompteur(){} function cgEcouterPresence(){}
 function cgMajBadges(){ var total=(cgNonLus.general||0)+(cgNonLus.jeu||0)+(cgNonLus.off||0); var b=document.getElementById('cg-badge-acc'); if(b){b.style.display=total>0?'flex':'none';b.textContent=total>9?'9+':total;} }
+
+
+// ── Photo de profil depuis galerie ──
+function profilGaleriePhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 2*1024*1024) { notif('Photo trop grande (max 2 Mo)','e'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    // Redimensionner à 200x200
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      canvas.width = 200; canvas.height = 200;
+      var ctx = canvas.getContext('2d');
+      var size = Math.min(img.width, img.height);
+      var ox = (img.width-size)/2, oy = (img.height-size)/2;
+      ctx.drawImage(img, ox, oy, size, size, 0, 0, 200, 200);
+      var b64 = canvas.toDataURL('image/jpeg', 0.75);
+      J.avatarImg = b64;
+      // Mettre à jour preview
+      var prev = document.getElementById('p-av-preview');
+      var emj = document.getElementById('p-av-emoji');
+      if (prev) { prev.style.backgroundImage='url('+b64+')'; prev.style.backgroundSize='cover'; }
+      if (emj) emj.style.display = 'none';
+      notif('Photo choisie ! Sauvegarde pour confirmer.','s');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Preview photo groupe ──
+function grpPreviewPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 2*1024*1024) { notif('Photo trop grande (max 2 Mo)','e'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      canvas.width = 150; canvas.height = 150;
+      var ctx = canvas.getContext('2d');
+      var size = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 150, 150);
+      var b64 = canvas.toDataURL('image/jpeg', 0.7);
+      window._grpPhotoB64 = b64;
+      var prev = document.getElementById('grp-av-preview');
+      if (prev) { prev.style.backgroundImage='url('+b64+')'; prev.style.backgroundSize='cover'; prev.innerHTML=''; }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Onglets modal messagerie ──
+window._grpPhotoB64 = null;
+window._grpMembres = []; // [{uid, pseudo, tel, avatar}]
+
+function mmodOnglet(t) {
+  var p = document.getElementById('mmod-prive');
+  var g = document.getElementById('mmod-groupe');
+  var tp = document.getElementById('mmod-tab-prive');
+  var tg = document.getElementById('mmod-tab-groupe');
+  if (p) p.style.display = t==='prive' ? '' : 'none';
+  if (g) g.style.display = t==='groupe' ? '' : 'none';
+  var activeStyle = 'background:linear-gradient(135deg,#1A8A84,var(--cyan));color:#fff;';
+  var inactiveStyle = 'background:none;color:var(--muet);';
+  if (tp) tp.style.cssText += t==='prive' ? activeStyle : inactiveStyle;
+  if (tg) tg.style.cssText += t==='groupe' ? activeStyle : inactiveStyle;
+}
+
+// ── Rechercher membre pour groupe par téléphone ──
+async function grpRechercherMembre() {
+  var tel = (document.getElementById('grp-tel-inp').value||'').trim();
+  if (!tel) { notif('Entre un numéro !','e'); return; }
+  var res = document.getElementById('grp-membre-result');
+  if (res) res.innerHTML = '<div style="color:var(--muet);font-size:.75rem;">🔍 Recherche...</div>';
+  try {
+    var snap = await get(ref(db,'joueurs'));
+    var data = snap.val() || {};
+    var trouve = null;
+    Object.keys(data).forEach(function(uid) {
+      if (data[uid].tel === tel && uid !== J.uid) trouve = { uid:uid, pseudo:data[uid].pseudo||'Joueur', tel:tel, avatar:data[uid].avatarImg||null };
+    });
+    if (!trouve) {
+      if (res) res.innerHTML = '<div style="color:var(--rose);font-size:.75rem;">Aucun joueur avec ce numéro.</div>';
+      return;
+    }
+    // Vérifier si déjà dans la liste
+    var dejaLa = window._grpMembres.some(function(m){ return m.uid===trouve.uid; });
+    if (dejaLa) { if(res) res.innerHTML='<div style="color:var(--muet);font-size:.75rem;">Déjà dans le groupe.</div>'; return; }
+    if (res) res.innerHTML = '';
+    // Afficher et proposer d'ajouter
+    var card = document.createElement('div');
+    card.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:12px;border:1px solid var(--bord);';
+    var avHtml = trouve.avatar
+      ? '<img src="'+trouve.avatar+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">'
+      : '<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--or));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;">'+(trouve.pseudo[0]||'?').toUpperCase()+'</div>';
+    card.innerHTML = avHtml
+      + '<div style="flex:1;"><div style="font-family:Orbitron,monospace;font-size:.7rem;font-weight:700;">'+msgEsc(trouve.pseudo)+'</div>'
+      + '<div style="font-size:.6rem;color:var(--muet);">'+tel+'</div></div>';
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-cyan';
+    btn.style.cssText = 'padding:6px 12px;font-size:.62rem;';
+    btn.textContent = '+ AJOUTER';
+    (function(t){ btn.onclick = function(){ grpAjouterMembre(t); document.getElementById('grp-tel-inp').value=''; card.remove(); }; })(trouve);
+    card.appendChild(btn);
+    if (res) res.appendChild(card);
+  } catch(e) { if(res) res.innerHTML='<div style="color:var(--rose);font-size:.75rem;">Erreur: '+e.message+'</div>'; }
+}
+
+function grpAjouterMembre(m) {
+  window._grpMembres.push(m);
+  var liste = document.getElementById('grp-membres-list');
+  if (!liste) return;
+  var chip = document.createElement('div');
+  chip.style.cssText = 'display:flex;align-items:center;gap:6px;background:rgba(78,205,196,.15);border:1px solid rgba(78,205,196,.3);border-radius:20px;padding:4px 10px;font-size:.7rem;';
+  var avHtml = m.avatar
+    ? '<img src="'+m.avatar+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">'
+    : '<div style="width:22px;height:22px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;">'+(m.pseudo[0]||'?').toUpperCase()+'</div>';
+  chip.innerHTML = avHtml + '<span style="font-family:Orbitron,monospace;font-size:.62rem;">'+msgEsc(m.pseudo)+'</span>';
+  var del = document.createElement('button');
+  del.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--muet);font-size:.75rem;padding:0 2px;';
+  del.textContent = '✕';
+  (function(uid,el){ del.onclick = function(){ window._grpMembres=window._grpMembres.filter(function(x){return x.uid!==uid;}); el.remove(); }; })(m.uid, chip);
+  chip.appendChild(del);
+  liste.appendChild(chip);
+  notif(m.pseudo+' ajouté au groupe','s');
+}
 
 // ══════════════ LEADERBOARD ══════════════
 var lbOngletActif = 'global';
@@ -4130,14 +4332,14 @@ function initApp() {
     demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
     sauvegarderProfil,onglet,traiterPhoto,retourMenu,acheterArt,acheterPack,equip,dequip,
     passerTour,terminer,
-    allerSolo,selModePartie,ajouterCatCustom,ongletProfil,effacerHistorique,copierCodeAmi,envoyerDemandeAmi,accepterAmi,refuserAmi,supprimerAmi,inviterAmiSalon,allerLeaderboard,lbOnglet,allerChatGlobal,cgOnglet,cgEnvoyer,cgAutoResize,cgMajCompteur,msgOnglet,msgFiltrer,msgOuvrirNouveauContact,msgFermerModal,msgChercherContact,msgDemarrerConv,msgCreerGroupe,msgRetourListe,msgEnvoyer,msgToggleVoice,msgAnnulerVoice,msgJouerAudio,msgLancerAppel,msgTerminerAppel,msgApMute,msgApSpk,retirerCatCustom,lancerMatchTournoi,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix,toggleAudioMsg,annulerAudioMsg,envoyerAudioMsg
+    allerSolo,selModePartie,ajouterCatCustom,ongletProfil,effacerHistorique,copierCodeAmi,envoyerDemandeAmi,accepterAmi,refuserAmi,supprimerAmi,inviterAmiSalon,allerLeaderboard,lbOnglet,allerChatGlobal,cgOnglet,cgEnvoyer,cgAutoResize,cgMajCompteur,msgOnglet,msgFiltrer,msgOuvrirNouveauContact,msgFermerModal,msgChercherContact,msgDemarrerConv,msgCreerGroupe,msgRetourListe,msgEnvoyer,msgToggleVoice,msgAnnulerVoice,msgJouerAudio,msgLancerAppel,msgTerminerAppel,msgApMute,msgApSpk,mmodOnglet,grpRechercherMembre,grpPreviewPhoto,profilGaleriePhoto,retirerCatCustom,lancerMatchTournoi,copierCode,partagerCode,toggleQR,extraireCodeLien,copierLien,demarrerScanner,arreterScanner,toggleChat,envoyerMessage,toggleMusique,toggleVoix,toggleAudioMsg,annulerAudioMsg,envoyerAudioMsg
   });
 }
 
 window.addEventListener('load', () => {
   // Exposer immédiatement les fonctions de navigation (avant Firebase)
   // pour éviter "allerChatGlobal is not defined" si cliqué avant initApp
-  Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk });
+  Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk, mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto });
 
   // Attendre que l auth anonyme soit etablie avant de demarrer
   // Cela evite le PERMISSION_DENIED lors des premieres operations Firebase
@@ -4168,7 +4370,17 @@ function allerEcran(id) {
   if (el) el.classList.add('actif');
   window.scrollTo(0,0);
 }
-function allerProfil() { document.getElementById('p-pseudo').value=J.pseudo||''; const telEl=document.getElementById('p-tel'); if(telEl) telEl.value=J.tel||''; document.getElementById('p-idx').textContent=J.indices||0; majApProfil(); rafPieces(); bEmo(); bBib(); allerEcran('e-profil'); ongletProfil('stats'); }
+function allerProfil() {
+  document.getElementById('p-pseudo').value=J.pseudo||'';
+  const telEl=document.getElementById('p-tel'); if(telEl) telEl.value=J.tel||'';
+  document.getElementById('p-idx').textContent=J.indices||0;
+  // Afficher la photo actuelle dans la preview
+  const prev=document.getElementById('p-av-preview');
+  const emj=document.getElementById('p-av-emoji');
+  if(prev && J.avatarImg) { prev.style.backgroundImage='url('+J.avatarImg+')'; prev.style.backgroundSize='cover'; if(emj) emj.style.display='none'; }
+  else if(emj) { emj.style.display=''; emj.textContent=J.emoji||'😊'; }
+  majApProfil(); rafPieces(); bEmo(); bBib(); allerEcran('e-profil'); ongletProfil('stats');
+}
 function allerBoutique() { rafPieces(); rendreBoutique(); allerEcran('e-bout'); }
 function retourMenu() { nettLis(); salonData=null; estHote=false; stopTimer(); arreterScanner(); fermerChat(); rafAcc(); allerEcran('e-acc'); }
 
@@ -4260,6 +4472,7 @@ function rafPieces() {
 // ══════════════ FIREBASE — CRÉER SALON ══════════════
 async function allerCreerSalon() {
   if(!J.pseudo){notif('Configure ton profil d\'abord !','e');allerProfil();return;}
+  if(!authReady || !J.uid){notif('Connexion en cours, réessaie...','e');return;}
   estHote=true;
   const code=randCode(), tours=10, lettres=randLettres(tours);
   const jData={pseudo:J.pseudo,emoji:J.emoji,avatarImg:J.avatarImg||null,estHote:true,connecte:true,scores:Array(tours).fill(0),uid:J.uid};
@@ -4271,7 +4484,28 @@ async function allerCreerSalon() {
     salonData=salon; salonData.code=code;
     ecouter(code); ouvrirSalon(code);
     notif('Salon créé !','s');
-  } catch(e){notif('Erreur: '+e.message,'e');console.error(e);}
+  } catch(e){
+    console.error(e);
+    if(e.message && e.message.includes('PERMISSION_DENIED')) {
+      // Afficher les règles Firebase à copier
+      var regles = '{\n  "rules": {\n    ".read": true,\n    ".write": "auth != null"\n  }\n}';
+      var msg = '🔒 Permission Firebase refusée.\n\nVa dans Firebase Console → Realtime Database → Règles et colle :\n\n' + regles;
+      notif('Permission refusée. Corrige les règles Firebase (voir console).','e');
+      console.warn('=== RÈGLES FIREBASE REQUISES ===\n' + regles + '\n================================');
+      // Afficher une bannière dans l\'app
+      var bannEl = document.getElementById('notif-regles');
+      if(!bannEl){ bannEl=document.createElement('div'); bannEl.id='notif-regles'; bannEl.style.cssText='position:fixed;top:60px;left:10px;right:10px;z-index:9999;background:#1A2A2A;border:2px solid var(--rose);border-radius:12px;padding:14px;font-size:.72rem;color:#fff;'; document.body.appendChild(bannEl); }
+      bannEl.innerHTML='<div style="font-family:Orbitron,monospace;font-size:.7rem;color:var(--rose);margin-bottom:8px;">🔒 RÈGLES FIREBASE À CORRIGER</div>'
+        +'<div style="margin-bottom:8px;color:rgba(255,255,255,.8);">Dans Firebase Console → Realtime Database → Règles, publie :</div>'
+        +'<pre style="background:rgba(0,0,0,.4);padding:8px;border-radius:8px;font-size:.65rem;margin-bottom:10px;overflow-x:auto;">{\n  "rules": {\n    ".read": true,\n    ".write": "auth != null"\n  }\n}</pre>'
+        +'<div style="display:flex;gap:8px;">'
+        +'<button onclick="navigator.clipboard.writeText(\'{\\"rules\\":{\\"read\\":true,\\"write\\":\\"auth != null\\"}}\').then(function(){notif(\'Copié !\',\'s\');})" style="flex:1;padding:7px;background:var(--cyan);border:none;border-radius:8px;cursor:pointer;font-family:Orbitron,monospace;font-size:.6rem;color:#fff;">📋 COPIER</button>'
+        +'<button onclick="document.getElementById(\'notif-regles\').remove()" style="flex:1;padding:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;cursor:pointer;font-size:.65rem;color:#fff;">✕ FERMER</button>'
+        +'</div>';
+    } else {
+      notif('Erreur: '+e.message,'e');
+    }
+  }
 }
 
 // ══════════════ FIREBASE — REJOINDRE ══════════════
