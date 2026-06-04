@@ -2642,33 +2642,39 @@ function msgOuvrirConv(c) {
   if (avEl) { avEl.innerHTML = c.avatar ? '<img src="'+c.avatar+'">' : (c.nom[0]||'?').toUpperCase(); }
   if (nomEl) nomEl.textContent = c.nom.toUpperCase();
   if (statEl) statEl.textContent = c.type === 'groupe' ? 'Groupe' : 'Conversation privée';
-  // Bouton appel seulement pour privé
+  // Bouton appel disponible pour tous (prive et groupe)
   var btnAppel = document.getElementById('conv-btn-appel');
-  if (btnAppel) btnAppel.style.display = c.type === 'prive' ? 'flex' : 'none';
+  if (btnAppel) btnAppel.style.display = 'flex';
   // Charger messages
   var box = document.getElementById('conv-messages');
   if (box) box.innerHTML = '<div class="msg-bwrap sys"><div class="msg-bubble">Chargement...</div></div>';
   var mRef = ref(db, 'msgconv/' + c.id + '/msgs');
-  if (msgListeners._conv) { off(ref(db, 'msgconv/' + (msgListeners._convId||'x') + '/msgs'), 'child_added', msgListeners._conv); }
+  // Détacher l'ancien listener proprement (onChildAdded retourne une fonction unsubscribe)
+  if (msgListeners._convUnsub) { try { msgListeners._convUnsub(); } catch(e){} msgListeners._convUnsub = null; }
   msgListeners._convId = c.id;
-  // Charger les 60 derniers
+  // Charger les 60 derniers avec get()
   get(mRef).then(function(snap) {
     if (box) box.innerHTML = '';
     var data = snap.val() || {};
     var keys = Object.keys(data).sort(function(a,b){ return (data[a].ts||0)-(data[b].ts||0); });
-    var lastKey = null;
-    keys.slice(-60).forEach(function(k){ msgAfficherBulle(data[k], false); lastKey=k; });
+    var seenKeys = {};
+    keys.slice(-60).forEach(function(k){ msgAfficherBulle(data[k], false); seenKeys[k]=true; });
     msgScrollBas('conv-messages');
-    // Marquer comme lu
     update(ref(db,'msgs/'+J.uid+'/'+c.id), {nonLu:0}).catch(function(){});
-    // Écouter nouveaux messages
-    msgListeners._conv = onChildAdded(mRef, function(snap2) {
+    // Enregistrer le timestamp du dernier message chargé pour filtrer les doublons
+    var listenFrom = Date.now();
+    // onChildAdded retourne une fonction unsubscribe en Firebase v9
+    msgListeners._convUnsub = onChildAdded(mRef, function(snap2) {
+      var key = snap2.key;
       var msg = snap2.val();
-      if (!msg || snap2.key === lastKey) return;
-      lastKey = snap2.key;
-      if (Date.now()-(msg.ts||0) < 10000) { msgAfficherBulle(msg, true); }
+      // Ignorer les messages déjà affichés via get()
+      if (!msg || seenKeys[key]) { seenKeys[key]=true; return; }
+      seenKeys[key] = true;
+      // Ignorer les messages trop anciens (> 30s avant qu'on ait ouvert)
+      if ((msg.ts||0) < listenFrom - 30000) return;
+      msgAfficherBulle(msg, true);
     });
-  }).catch(function(e) {
+  }).catch(function() {
     if (box) box.innerHTML = '<div class="msg-bwrap sys"><div class="msg-bubble">Erreur de chargement</div></div>';
   });
 }
@@ -2676,11 +2682,12 @@ function msgOuvrirConv(c) {
 // ── Retour à la liste ──
 function msgRetourListe() {
   allerEcran('e-chatglobal');
-  if (msgListeners._conv) {
-    try { off(ref(db, 'msgconv/'+(msgListeners._convId||'x')+'/msgs'), 'child_added', msgListeners._conv); } catch(e){}
-    msgListeners._conv = null;
+  if (msgListeners._convUnsub) {
+    try { msgListeners._convUnsub(); } catch(e){}
+    msgListeners._convUnsub = null;
   }
   msgConvActuelle = null;
+  document.getElementById('conv-menu') && (document.getElementById('conv-menu').style.display='none');
 }
 
 // ── Afficher une bulle ──
@@ -2961,40 +2968,83 @@ async function msgEnvoyerVoice() {
 
 // ── Appel vocal WebRTC ──
 async function msgLancerAppel() {
-  if (!msgConvActuelle || !msgConvActuelle.autreUid) return;
-  if (!navigator.mediaDevices) { notif('Appel non disponible','e'); return; }
+  if (!msgConvActuelle) return;
+  // Vérifier HTTPS (requis pour getUserMedia)
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    notif('Les appels nécessitent une connexion sécurisée (HTTPS)', 'e'); return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    notif('Appel vocal non supporté sur ce navigateur', 'e'); return;
+  }
   try {
-    msgApStream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    msgApPc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
-    msgApStream.getTracks().forEach(function(t){ msgApPc.addTrack(t,msgApStream); });
-    msgApPc.ontrack = function(e){ var au=new Audio(); au.srcObject=e.streams[0]; au.autoplay=true; };
-    msgApPc.onicecandidate = function(e){ if(e.candidate) set(push(ref(db,'appels/'+msgConvActuelle.id+'/'+J.uid+'/ice')),e.candidate.toJSON()).catch(function(){}); };
+    msgApStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    msgApPc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
+    msgApStream.getTracks().forEach(function(t){ msgApPc.addTrack(t, msgApStream); });
+    msgApPc.ontrack = function(e) {
+      var au = document.getElementById('appel-audio-out');
+      if (!au) { au = document.createElement('audio'); au.id='appel-audio-out'; au.autoplay=true; document.body.appendChild(au); }
+      au.srcObject = e.streams[0];
+    };
+    msgApPc.onicecandidate = function(e) {
+      if (e.candidate && msgConvActuelle) {
+        set(push(ref(db,'appels/'+msgConvActuelle.id+'/'+J.uid+'/ice')), e.candidate.toJSON()).catch(function(){});
+      }
+    };
+    msgApPc.onconnectionstatechange = function() {
+      var stEl = document.getElementById('appel-statut');
+      if (stEl) {
+        var states = {connecting:'Connexion...', connected:'En communication', disconnected:'Déconnecté', failed:'Échec de connexion'};
+        stEl.textContent = states[msgApPc.connectionState] || 'Appel en cours';
+      }
+    };
     var offer = await msgApPc.createOffer({offerToReceiveAudio:true});
     await msgApPc.setLocalDescription(offer);
-    await set(ref(db,'appels/'+msgConvActuelle.id+'/offer'),{sdp:offer.sdp,uid:J.uid,pseudo:J.pseudo,ts:Date.now()});
-    // Passer à l'écran d'appel
+    await set(ref(db,'appels/'+msgConvActuelle.id+'/offer'), {sdp:offer.sdp, uid:J.uid, pseudo:J.pseudo, ts:Date.now()});
+    // Écouter la réponse
+    var answerRef = ref(db,'appels/'+msgConvActuelle.id+'/answer');
+    var unsubAnswer = onValue(answerRef, async function(snap) {
+      if (snap.exists() && msgApPc && msgApPc.signalingState === 'have-local-offer') {
+        try { await msgApPc.setRemoteDescription({type:'answer', sdp:snap.val().sdp}); } catch(e){}
+        unsubAnswer();
+      }
+    });
     allerEcran('e-msg-appel');
-    var avEl=document.getElementById('appel-av'); if(avEl) avEl.innerHTML=msgConvActuelle.avatar?'<img src="'+msgConvActuelle.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">':msgConvActuelle.nom[0].toUpperCase();
-    var nomEl=document.getElementById('appel-nom'); if(nomEl) nomEl.textContent=msgConvActuelle.nom.toUpperCase();
-    var stEl=document.getElementById('appel-statut'); if(stEl) stEl.textContent='Appel en cours...';
-    msgApSecs=0; msgApTimer=setInterval(function(){ msgApSecs++; var m=Math.floor(msgApSecs/60),s=msgApSecs%60; var tel=document.getElementById('appel-timer'); if(tel)tel.textContent=m+':'+(s<10?'0':'')+s; },1000);
-  } catch(e){ notif('Erreur appel: '+e.message,'e'); }
+    var avEl = document.getElementById('appel-av');
+    if (avEl) avEl.innerHTML = msgConvActuelle.avatar
+      ? '<img src="'+msgConvActuelle.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">'
+      : (msgConvActuelle.nom[0]||'?').toUpperCase();
+    var nomEl = document.getElementById('appel-nom'); if(nomEl) nomEl.textContent = msgConvActuelle.nom.toUpperCase();
+    var stEl = document.getElementById('appel-statut'); if(stEl) stEl.textContent = 'Appel en cours...';
+    msgApSecs = 0;
+    msgApTimer = setInterval(function(){
+      msgApSecs++;
+      var m = Math.floor(msgApSecs/60), s = msgApSecs%60;
+      var tel = document.getElementById('appel-timer');
+      if (tel) tel.textContent = m+':'+(s<10?'0':'')+s;
+    }, 1000);
+  } catch(e) {
+    notif('Erreur appel: '+e.message, 'e');
+    console.error('Appel error:', e);
+  }
 }
 
 function msgTerminerAppel() {
   if (msgApPc) { try{ msgApPc.close(); }catch(e){} msgApPc=null; }
   if (msgApStream) { msgApStream.getTracks().forEach(function(t){t.stop();}); msgApStream=null; }
   clearInterval(msgApTimer); msgApTimer=null;
+  var au = document.getElementById('appel-audio-out'); if(au) au.remove();
   if (msgConvActuelle) allerEcran('e-msg-conv');
   else allerEcran('e-chatglobal');
 }
 
 function msgApMute() {
   msgApMuted = !msgApMuted;
-  if (msgApStream) msgApStream.getAudioTracks().forEach(function(t){ t.enabled=!msgApMuted; });
-  var btn=document.getElementById('appel-btn-mute'); if(btn) btn.textContent=msgApMuted?'🔇':'🎤';
+  if (msgApStream) msgApStream.getAudioTracks().forEach(function(t){ t.enabled = !msgApMuted; });
+  var btn = document.getElementById('appel-btn-mute');
+  if (btn) btn.innerHTML = msgApMuted
+    ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8"/></svg>'
+    : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>';
 }
-function msgApSpk() { notif('Haut-parleur (non supporté sur mobile)','i'); }
 
 // Compat anciennes fonctions chat (groupes publics remplacés par convs groupe)
 var cgCanalActif='general', cgListeners={}, cgDernierMsgKey={}, cgNonLus={general:0,jeu:0,off:0};
