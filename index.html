@@ -6032,6 +6032,22 @@ function rejouerSolo() { lancerSolo(); }
 // Exposer fonctions solo
 Object.assign(window, { allerSolo, selectionnerMode, selDiff, selObj, lancerSolo, rejouerSolo });
 
+// ══ DIAGNOSTIC DÉMARRAGE ══
+(function checkStart() {
+  var diag = document.getElementById('diag-start');
+  if (!diag) {
+    diag = document.createElement('div');
+    diag.id = 'diag-start';
+    diag.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1A1A2E;color:#4ECDC4;font-size:11px;padding:4px 8px;font-family:monospace;max-height:80px;overflow:auto;';
+    document.body.appendChild(diag);
+  }
+  diag.textContent = '✅ Module JS chargé — Exposing functions...';
+  // Auto-hide après 4s si tout va bien
+  setTimeout(function() {
+    if (diag && diag.parentNode) diag.remove();
+  }, 5000);
+})();
+
 // ══════════════════════════════════════════════════════════════════════
 // DÉMARRAGE — placé ICI en fin de module pour que TOUTES les fonctions
 // soient définies avant d'être exposées sur window et avant initApp()
@@ -6058,7 +6074,27 @@ Object.assign(window, {
   toggleMusique, toggleVoix, toggleAudioMsg, annulerAudioMsg, envoyerAudioMsg
 });
 
-initApp();
+// Vérifier que les fonctions critiques sont bien exposées
+var manquantes = ['allerEcran','allerProfil','allerCreerSalon','allerSolo','allerChatGlobal'].filter(function(f){ return typeof window[f] !== 'function'; });
+if (manquantes.length > 0) {
+  var diag = document.getElementById('diag-start');
+  if (diag) diag.textContent = '❌ Fonctions manquantes: ' + manquantes.join(', ');
+  console.error('Fonctions manquantes sur window:', manquantes);
+} else {
+  var diag = document.getElementById('diag-start');
+  if (diag) diag.textContent = '✅ Toutes les fonctions exposées — initApp()...';
+}
+
+try {
+  initApp();
+  var diag2 = document.getElementById('diag-start');
+  if (diag2) diag2.textContent = '✅ initApp() OK — App prête !';
+} catch(e) {
+  var diag2 = document.getElementById('diag-start');
+  if (diag2) diag2.style.background = '#8B0000';
+  if (diag2) diag2.textContent = '❌ initApp() ERREUR: ' + e.message;
+  console.error('initApp error:', e);
+}
 
 onAuthStateChanged(auth, user => {
   if (user && user.uid) {
