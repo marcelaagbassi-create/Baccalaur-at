@@ -4580,23 +4580,7 @@ function initApp() {
   });
 }
 
-window.addEventListener('load', () => {
-  // Exposer immédiatement les fonctions de navigation
-  Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk, mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto, msgToggleMenu, msgModifierNom, msgPartagerConv, msgSignalerConv, msgSupprimerConv, convAjouterMembre });
-
-  // Démarrer IMMÉDIATEMENT — pas d'attente Firebase
-  initApp();
-
-  // Auth Firebase en parallèle (améliore les fonctions en ligne)
-  onAuthStateChanged(auth, user => {
-    if (user && user.uid) {
-      authReady = true;
-      if (J.uid !== user.uid) { J.uid = user.uid; sauvegarderLocal(); }
-      // Publier profil une fois connecté
-      try { publierProfil(); ecouterInvitations(); } catch(e) {}
-    }
-  });
-});
+// [demarrage déplacé en fin de script]
 
 // ══════════════ LOCAL STORAGE ══════════════
 function sauvegarderLocal() { try { localStorage.setItem('bac3',JSON.stringify(J)); } catch(e){} }
@@ -6045,8 +6029,44 @@ function finirSolo() {
 
 function rejouerSolo() { lancerSolo(); }
 
-// Exposer
+// Exposer fonctions solo
 Object.assign(window, { allerSolo, selectionnerMode, selDiff, selObj, lancerSolo, rejouerSolo });
+
+// ══════════════════════════════════════════════════════════════════════
+// DÉMARRAGE — placé ICI en fin de module pour que TOUTES les fonctions
+// soient définies avant d'être exposées sur window et avant initApp()
+// ══════════════════════════════════════════════════════════════════════
+Object.assign(window, {
+  allerEcran, allerProfil, allerBoutique, allerCreerSalon, rejoindre, quitterSalon, lancerPartie,
+  demanderArret, confirmerArret, fermerModal, ouvrirIndice, fermPan, useIndice,
+  sauvegarderProfil, onglet, traiterPhoto, retourMenu, acheterArt, acheterPack, equip, dequip,
+  passerTour, terminer,
+  allerSolo, selModePartie, ajouterCatCustom, ongletProfil, effacerHistorique,
+  copierCodeAmi, envoyerDemandeAmi, accepterAmi, refuserAmi, supprimerAmi, inviterAmiSalon,
+  allerLeaderboard, lbOnglet,
+  allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur,
+  msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact,
+  msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer,
+  msgToggleVoice, msgAnnulerVoice, msgJouerAudio,
+  msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk,
+  mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto,
+  msgToggleMenu, msgModifierNom, msgPartagerConv, msgSignalerConv, msgSupprimerConv, convAjouterMembre,
+  retirerCatCustom, lancerMatchTournoi,
+  copierCode, partagerCode, toggleQR, extraireCodeLien, copierLien,
+  demarrerScanner, arreterScanner,
+  toggleChat, envoyerMessage,
+  toggleMusique, toggleVoix, toggleAudioMsg, annulerAudioMsg, envoyerAudioMsg
+});
+
+initApp();
+
+onAuthStateChanged(auth, user => {
+  if (user && user.uid) {
+    authReady = true;
+    if (J.uid !== user.uid) { J.uid = user.uid; sauvegarderLocal(); }
+    try { publierProfil(); ecouterInvitations(); } catch(e) {}
+  }
+});
 </script>
 </body>
 </html>
