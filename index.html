@@ -4533,7 +4533,6 @@ function initApp() {
   bEmo(); bBib();
   rafAcc();
   verifierLienInvitation();
-  setTimeout(function(){ publierProfil(); ecouterInvitations(); }, 2000);
   // Démarrer la musique automatiquement
   setTimeout(function() {
     if (musiqueActif) creerMusique();
@@ -4545,15 +4544,25 @@ function initApp() {
       loader.classList.add('fade-out');
       setTimeout(() => loader.remove(), 700);
     }
-  }, 1800);
-  // Connexion Firebase status
-  onValue(ref(db,'.info/connected'), s => {
-    const el = document.getElementById('fb-status');
-    if (s.val()) { el.innerHTML = '<span style="color:var(--vert);">● Serveur connecté</span>'; }
-    else { el.innerHTML = '<span style="color:var(--rose);">● Hors ligne — Vérifiez votre connexion</span>'; }
-  });
+  }, 1200);
+  // Connexion Firebase status — avec retry display
+  var fbEl = document.getElementById('fb-status');
+  if (fbEl) fbEl.innerHTML = '<div class="spin" style="width:12px;height:12px;margin:0;border-width:2px;flex-shrink:0;"></div><span>Connexion Firebase...</span>';
+  try {
+    onValue(ref(db,'.info/connected'), s => {
+      const el = document.getElementById('fb-status');
+      if (!el) return;
+      if (s.val()) {
+        el.innerHTML = '<span style="color:var(--vert);">● Serveur connecté</span>';
+        authReady = true;
+      } else {
+        el.innerHTML = '<span style="color:var(--rose);">● Hors ligne</span>';
+      }
+    });
+  } catch(e) {
+    if (fbEl) fbEl.innerHTML = '<span style="color:var(--rose);">● Firebase indisponible</span>';
+  }
   // Exposer fonctions globales
-  // window.valider est défini plus bas par l'override solo — ne pas l'écraser ici
   Object.assign(window, {
     allerEcran,allerProfil,allerBoutique,allerCreerSalon,rejoindre,quitterSalon,lancerPartie,
     demanderArret,confirmerArret,fermerModal,ouvrirIndice,fermPan,useIndice,
@@ -4565,18 +4574,43 @@ function initApp() {
 
 window.addEventListener('load', () => {
   // Exposer immédiatement les fonctions de navigation (avant Firebase)
-  // pour éviter "allerChatGlobal is not defined" si cliqué avant initApp
   Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk, mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto, msgToggleMenu, msgModifierNom, msgPartagerConv, msgSignalerConv, msgSupprimerConv, convAjouterMembre });
 
-  // Attendre que l auth anonyme soit etablie avant de demarrer
-  // Cela evite le PERMISSION_DENIED lors des premieres operations Firebase
+  // Démarrer l'app IMMÉDIATEMENT (données locales) sans bloquer sur Firebase
   let appDemarre = false;
-  const demarrer = () => { if (!appDemarre) { appDemarre = true; initApp(); } };
-  const unsubscribe = onAuthStateChanged(auth, user => {
-    if (user) { unsubscribe(); demarrer(); }
+  function demarrer() {
+    if (appDemarre) return;
+    appDemarre = true;
+    initApp();
+  }
+
+  // Lancer immédiatement — les données locales sont disponibles tout de suite
+  demarrer();
+
+  // Auth Firebase en parallèle — améliore les fonctions en ligne une fois prête
+  const unsubscribeAuth = onAuthStateChanged(auth, user => {
+    if (user) {
+      authReady = true;
+      unsubscribeAuth();
+      // Mettre à jour l'UID avec celui Firebase si différent
+      if (J.uid !== user.uid) {
+        J.uid = user.uid;
+        sauvegarderLocal();
+      }
+      // Publier le profil maintenant que l'auth est prête
+      setTimeout(function(){ publierProfil(); ecouterInvitations(); }, 500);
+    }
   });
-  // Fallback si auth prend trop longtemps (pas de reseau)
-  setTimeout(demarrer, 4000);
+
+  // Timeout auth : après 6s, marquer authReady quand même pour débloquer les opérations locales
+  setTimeout(function() {
+    if (!authReady) {
+      console.warn('Auth Firebase timeout — mode dégradé');
+      authReady = true; // Permet aux fonctions locales de fonctionner
+      var el = document.getElementById('fb-status');
+      if (el) el.innerHTML = '<span style="color:var(--rose);">● Hors ligne — Fonctionnalités limitées</span>';
+    }
+  }, 6000);
 });
 
 // ══════════════ LOCAL STORAGE ══════════════
