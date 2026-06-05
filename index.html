@@ -1968,13 +1968,26 @@ const app = initializeApp(fbConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// ══════════════ AUTH ANONYME (résout PERMISSION_DENIED) ══════════════
+// ══════════════ AUTH ANONYME ══════════════
 let authReady = false;
-signInAnonymously(auth).catch(e => console.warn('Auth anonyme échouée:', e));
-onAuthStateChanged(auth, user => {
-  if (user && !authReady) {
+
+// Tenter l'auth anonyme sans bloquer quoi que ce soit
+(async function() {
+  try {
+    await signInAnonymously(auth);
+  } catch(e) {
+    console.warn('signInAnonymously échouée (normal sur certains domaines):', e.code);
+    // Même sans auth Firebase, l'app fonctionne en mode local
     authReady = true;
-    console.log('✅ Auth Firebase OK, uid:', user.uid);
+  }
+})();
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    authReady = true;
+    // Mettre à jour le statut visuel
+    var el = document.getElementById('fb-status');
+    if (el) el.innerHTML = '<span style="color:var(--vert);">● Serveur connecté</span>';
   }
 });
 
@@ -4533,35 +4546,30 @@ function initApp() {
   bEmo(); bBib();
   rafAcc();
   verifierLienInvitation();
-  // Démarrer la musique automatiquement
-  setTimeout(function() {
-    if (musiqueActif) creerMusique();
-  }, 1000);
-  // Masquer le loader après init
+  // Musique
+  setTimeout(function() { if (musiqueActif) creerMusique(); }, 1000);
+  // Masquer le loader
   setTimeout(() => {
     const loader = document.getElementById('davieslay-loader');
-    if (loader) {
-      loader.classList.add('fade-out');
-      setTimeout(() => loader.remove(), 700);
-    }
-  }, 1200);
-  // Connexion Firebase status — avec retry display
+    if (loader) { loader.classList.add('fade-out'); setTimeout(() => loader.remove(), 700); }
+  }, 1000);
+  // Cacher immédiatement le spinner "Connexion au serveur"
+  // L'app est utilisable localement sans attendre Firebase
   var fbEl = document.getElementById('fb-status');
-  if (fbEl) fbEl.innerHTML = '<div class="spin" style="width:12px;height:12px;margin:0;border-width:2px;flex-shrink:0;"></div><span>Connexion Firebase...</span>';
+  if (fbEl) fbEl.style.display = 'none';
+  // Vérifier la connexion Firebase en arrière-plan
   try {
-    onValue(ref(db,'.info/connected'), s => {
-      const el = document.getElementById('fb-status');
+    onValue(ref(db, '.info/connected'), function(s) {
+      var el = document.getElementById('fb-status');
       if (!el) return;
       if (s.val()) {
+        el.style.display = 'flex';
         el.innerHTML = '<span style="color:var(--vert);">● Serveur connecté</span>';
-        authReady = true;
       } else {
-        el.innerHTML = '<span style="color:var(--rose);">● Hors ligne</span>';
+        el.style.display = 'none'; // Masquer si hors ligne — pas besoin d'inquiéter
       }
     });
-  } catch(e) {
-    if (fbEl) fbEl.innerHTML = '<span style="color:var(--rose);">● Firebase indisponible</span>';
-  }
+  } catch(e) { console.warn('Firebase status error:', e); }
   // Exposer fonctions globales
   Object.assign(window, {
     allerEcran,allerProfil,allerBoutique,allerCreerSalon,rejoindre,quitterSalon,lancerPartie,
@@ -4573,44 +4581,21 @@ function initApp() {
 }
 
 window.addEventListener('load', () => {
-  // Exposer immédiatement les fonctions de navigation (avant Firebase)
+  // Exposer immédiatement les fonctions de navigation
   Object.assign(window, { allerChatGlobal, cgOnglet, cgEnvoyer, cgAutoResize, cgMajCompteur, msgOnglet, msgFiltrer, msgOuvrirNouveauContact, msgFermerModal, msgChercherContact, msgDemarrerConv, msgCreerGroupe, msgRetourListe, msgEnvoyer, msgToggleVoice, msgAnnulerVoice, msgJouerAudio, msgLancerAppel, msgTerminerAppel, msgApMute, msgApSpk, mmodOnglet, grpRechercherMembre, grpPreviewPhoto, profilGaleriePhoto, msgToggleMenu, msgModifierNom, msgPartagerConv, msgSignalerConv, msgSupprimerConv, convAjouterMembre });
 
-  // Démarrer l'app IMMÉDIATEMENT (données locales) sans bloquer sur Firebase
-  let appDemarre = false;
-  function demarrer() {
-    if (appDemarre) return;
-    appDemarre = true;
-    initApp();
-  }
+  // Démarrer IMMÉDIATEMENT — pas d'attente Firebase
+  initApp();
 
-  // Lancer immédiatement — les données locales sont disponibles tout de suite
-  demarrer();
-
-  // Auth Firebase en parallèle — améliore les fonctions en ligne une fois prête
-  const unsubscribeAuth = onAuthStateChanged(auth, user => {
-    if (user) {
+  // Auth Firebase en parallèle (améliore les fonctions en ligne)
+  onAuthStateChanged(auth, user => {
+    if (user && user.uid) {
       authReady = true;
-      unsubscribeAuth();
-      // Mettre à jour l'UID avec celui Firebase si différent
-      if (J.uid !== user.uid) {
-        J.uid = user.uid;
-        sauvegarderLocal();
-      }
-      // Publier le profil maintenant que l'auth est prête
-      setTimeout(function(){ publierProfil(); ecouterInvitations(); }, 500);
+      if (J.uid !== user.uid) { J.uid = user.uid; sauvegarderLocal(); }
+      // Publier profil une fois connecté
+      try { publierProfil(); ecouterInvitations(); } catch(e) {}
     }
   });
-
-  // Timeout auth : après 6s, marquer authReady quand même pour débloquer les opérations locales
-  setTimeout(function() {
-    if (!authReady) {
-      console.warn('Auth Firebase timeout — mode dégradé');
-      authReady = true; // Permet aux fonctions locales de fonctionner
-      var el = document.getElementById('fb-status');
-      if (el) el.innerHTML = '<span style="color:var(--rose);">● Hors ligne — Fonctionnalités limitées</span>';
-    }
-  }, 6000);
 });
 
 // ══════════════ LOCAL STORAGE ══════════════
