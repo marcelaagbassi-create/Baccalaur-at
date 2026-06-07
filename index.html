@@ -48,7 +48,17 @@
         return fetch(url(path), {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(val)}).then(function(r){return r.json();});
       },
       update: function(val) {
-        return fetch(url(path), {method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify(val)}).then(function(r){return r.json();});
+        // Firebase REST PATCH supporte les chemins imbriqués via les clés avec /
+        // Il faut encoder les / dans les clés comme des chemins séparés
+        // En réalité l'API REST Firebase supporte les "multi-location updates" directement
+        return fetch(url(path), {
+          method:"PATCH",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(val)
+        }).then(function(r){
+          if(!r.ok) return r.json().then(function(e){ throw new Error(e.error || 'Update failed'); });
+          return r.json();
+        });
       },
       remove: function() {
         return fetch(url(path), {method:"DELETE"}).then(function(r){return r.json();});
@@ -1254,9 +1264,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
         <div id="cats-selector" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
         <div style="margin-top:10px;">
           <label style="font-size:.7rem;letter-spacing:2px;color:var(--muet);margin-bottom:6px;display:block;">+ CATÉGORIE PERSONNALISÉE</label>
-          <div style="display:flex;gap:6px;">
-            <input class="champ" id="cat-custom-input" placeholder="Ex: Sport, Instrument..." maxlength="30" style="flex:1;padding:8px 12px;">
-            <button class="btn btn-cyan" onclick="ajouterCatCustom()" style="padding:8px 14px;flex-shrink:0;">Ajouter</button>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input class="champ" id="cat-custom-input" placeholder="Ex: Sport, Instrument..." maxlength="30" style="width:100%;padding:8px 12px;box-sizing:border-box;">
+            <button class="btn btn-cyan" onclick="ajouterCatCustom()" style="width:100%;padding:10px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              AJOUTER
+            </button>
           </div>
           <div id="cats-custom-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
         </div>
@@ -3086,7 +3099,9 @@ async function msgToggleVoice() {
     try {
       var stream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
       msgVoiceChunks = [];
-      msgVoiceRec = new MediaRecorder(stream);
+      var mTypes = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg','audio/mp4',''];
+      var mType = mTypes.find(function(m){ return m === '' || MediaRecorder.isTypeSupported(m); }) || '';
+      msgVoiceRec = new MediaRecorder(stream, mType ? {mimeType: mType} : {});
       msgVoiceRec.ondataavailable = function(e){ if(e.data.size>0) msgVoiceChunks.push(e.data); };
       msgVoiceRec.start(100);
       msgVoiceActif = true;
@@ -4124,7 +4139,10 @@ async function demarrerAudioMsg() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     audioMsgChunks = [];
-    audioMsgRec = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
+    const mimeTypes = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg','audio/mp4',''];
+    const mimeType = mimeTypes.find(function(m){ return m === '' || MediaRecorder.isTypeSupported(m); }) || '';
+    const recOptions = mimeType ? { mimeType: mimeType } : {};
+    audioMsgRec = new MediaRecorder(stream, recOptions);
     audioMsgRec.ondataavailable = e => { if (e.data.size > 0) audioMsgChunks.push(e.data); };
     audioMsgRec.start(100);
     audioMsgActif = true;
@@ -5026,15 +5044,27 @@ async function quitterSalon() {
 
 // ══════════════ LANCER PARTIE ══════════════
 async function lancerPartie() {
-  // Chat reste visible pendant la partie
   if(!salonData) return;
   const tours=parseInt(document.getElementById('sel-tours')?.value||10);
   const lettres=randLettres(tours);
-  const upd={parametres:{tours},lettres,tourActuel:0,reponsesTours:{},etat:'tour_1_revelation'};
-  // Reset scores
-  Object.keys(salonData.joueurs||{}).forEach(uid=>{ upd[`joueurs/${uid}/scores`]=Array(tours).fill(0); });
-  try { await update(ref(db,`salons/${salonData.code}`),upd); }
-  catch(e){notif('Erreur: '+e.message,'e');console.error(e);}
+  // Construire la mise à jour — les chemins imbriqués avec / sont supportés par Firebase REST PATCH
+  const upd={
+    'parametres/tours': tours,
+    'lettres': lettres,
+    'tourActuel': 0,
+    'reponsesTours': null,
+    'etat': 'tour_1_revelation'
+  };
+  // Reset scores pour chaque joueur
+  Object.keys(salonData.joueurs||{}).forEach(function(uid){
+    upd['joueurs/' + uid + '/scores'] = Array(tours).fill(0);
+  });
+  try {
+    await update(ref(db, 'salons/' + salonData.code), upd);
+  } catch(e) {
+    notif('Erreur lancement: ' + e.message, 'e');
+    console.error('lancerPartie error:', e);
+  }
 }
 
 // ══════════════ RÉVÉLATION ══════════════
