@@ -2131,21 +2131,32 @@ const onAuthStateChanged = function(a,cb){ return window._fb.onAuthStateChanged(
 // ══════════════ AUTH ANONYME ══════════════
 let authReady = false;
 
-// Tenter l'auth anonyme sans bloquer quoi que ce soit
+// authReady = true dès qu'on a un uid local (pas besoin de Firebase auth pour jouer)
+// Firebase auth améliore la sécurité mais n'est pas bloquante
+(function() {
+  // Si on a déjà un uid local stocké, on est prêt immédiatement
+  try {
+    var stored = localStorage.getItem('bac3');
+    if (stored) {
+      var parsed = JSON.parse(stored);
+      if (parsed && parsed.uid) { authReady = true; }
+    }
+  } catch(e) {}
+})();
+
+// Tenter l'auth Firebase en arrière-plan (améliore la sécurité si ça marche)
 (async function() {
   try {
     await signInAnonymously(auth);
   } catch(e) {
-    console.warn('signInAnonymously échouée (normal sur certains domaines):', e.code);
-    // Même sans auth Firebase, l'app fonctionne en mode local
-    authReady = true;
+    console.warn('signInAnonymously échouée (normal sur certains domaines):', e.code || e.message);
+    authReady = true; // Débloquer quand même
   }
 })();
 
 onAuthStateChanged(auth, user => {
   if (user) {
     authReady = true;
-    // Mettre à jour le statut visuel
     var el = document.getElementById('fb-status');
     if (el) el.innerHTML = '<span style="color:var(--vert);">● Serveur connecté</span>';
   }
@@ -3218,6 +3229,7 @@ function msgApMute() {
     ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8"/></svg>'
     : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>';
 }
+function msgApSpk() { notif('Haut-parleur', 'i'); }
 
 // Compat anciennes fonctions chat (groupes publics remplacés par convs groupe)
 var cgCanalActif='general', cgListeners={}, cgDernierMsgKey={}, cgNonLus={general:0,jeu:0,off:0};
@@ -4703,6 +4715,7 @@ function verifierSalonPending() {
 function initApp() {
   chargerLocal();
   if (!J.uid) { J.uid = 'u_'+Math.random().toString(36).substr(2,8)+Date.now().toString(36); sauvegarderLocal(); }
+  authReady = true; // uid local = suffisant pour jouer
   bEmo(); bBib();
   rafAcc();
   verifierLienInvitation();
@@ -4862,7 +4875,7 @@ function rafPieces() {
 // ══════════════ FIREBASE — CRÉER SALON ══════════════
 async function allerCreerSalon() {
   if(!J.pseudo){notif('Configure ton profil d\'abord !','e');allerProfil();return;}
-  if(!authReady || !J.uid){notif('Connexion en cours, réessaie...','e');return;}
+  if(!J.uid){ J.uid='u_'+Math.random().toString(36).substr(2,8); sauvegarderLocal(); }
   estHote=true;
   const code=randCode(), tours=10, lettres=randLettres(tours);
   const jData={pseudo:J.pseudo,emoji:J.emoji,avatarImg:J.avatarImg||null,estHote:true,connecte:true,scores:Array(tours).fill(0),uid:J.uid};
